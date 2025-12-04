@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  nats:
+    image: nats:latest
+    container_name: aurora-nats
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command: ["--http_port", "8222"]
+    networks:
+      - aurora-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: aurora-postgres
+    environment:
+      POSTGRES_USER: aurora
+      POSTGRES_PASSWORD: aurora_secret
+      POSTGRES_DB: aurora_home
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - aurora-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aurora -d aurora_home"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    build:
+      context: ../services/auth-service
+      dockerfile: Dockerfile
+    container_name: aurora-auth-service
+    ports:
+      - "8080:8080"
+    environment:
+      - JWT_SECRET=aurora-super-secret-key-2024
+      - SERVER_PORT=8080
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=aurora
+      - DB_PASSWORD=aurora_secret
+      - DB_NAME=aurora_home
+      - DB_SSLMODE=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+    networks:
+      - aurora-network
+
+  sensors-service:
+    build:
+      context: ../services/sensors-service
+      dockerfile: Dockerfile
+    container_name: aurora-sensors-service
+    ports:
+      - "8081:8081"
+    environment:
+      - JWT_SECRET=aurora-super-secret-key-2024
+      - SERVER_PORT=8081
+      - NATS_URL=nats://nats:4222
+    depends_on:
+      - nats
+      - auth-service
+    networks:
+      - aurora-network
+
+networks:
+  aurora-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
