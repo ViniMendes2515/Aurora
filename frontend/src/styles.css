@@ -1,0 +1,88 @@
+/* Aurora Home System - Global Styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --aurora-base: #e1c78c;
+  --aurora-primary: #eda011;
+  --aurora-secondary: #db6516;
+  --aurora-dark: #7a6949;
+  --aurora-light: #adad8e;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  @apply bg-aurora-light text-aurora-dark font-sans;
+  min-height: 100vh;
+}
+
+/* Botões padrão Aurora */
+.btn-primary {
+  @apply bg-aurora-primary hover:bg-aurora-secondary text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300;
+}
+
+.btn-secondary {
+  @apply bg-aurora-dark hover:bg-aurora-secondary text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300;
+}
+
+/* Cards Aurora */
+.card-aurora {
+  @apply bg-white rounded-xl shadow-lg p-6 border border-aurora-base/30;
+}
+
+/* Inputs customizados */
+.input-aurora {
+  @apply w-full px-4 py-3 rounded-xl border border-aurora-base focus:border-aurora-primary focus:ring-2 focus:ring-aurora-primary/20 outline-none transition-all duration-300;
+}
+
+/* Links */
+.link-aurora {
+  @apply text-aurora-primary hover:text-aurora-secondary underline transition-colors duration-300;
+}
+
+/* PrimeNG Overrides para Aurora */
+.p-button {
+  @apply bg-aurora-primary border-aurora-primary hover:bg-aurora-secondary hover:border-aurora-secondary;
+}
+
+.p-inputtext:enabled:focus {
+  border-color: var(--aurora-primary) !important;
+  box-shadow: 0 0 0 0.2rem rgba(237, 160, 17, 0.25) !important;
+}
+
+.p-password-input:enabled:focus {
+  border-color: var(--aurora-primary) !important;
+  box-shadow: 0 0 0 0.2rem rgba(237, 160, 17, 0.25) !important;
+}
+
+.p-card {
+  @apply rounded-xl shadow-lg;
+}
+
+.p-card .p-card-content {
+  padding: 0;
+}
+
+/* Scrollbar customizada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-aurora-light/50;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-aurora-dark/50 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-aurora-dark;
+}

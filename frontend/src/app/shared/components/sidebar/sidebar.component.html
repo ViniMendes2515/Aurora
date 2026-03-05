@@ -1,0 +1,34 @@
+<aside class="sidebar" 
+       [class.sidebar-collapsed]="isCollapsed" 
+       [class.sidebar-hidden]="!isOpen">
+  <div class="sidebar-header">
+    <div class="logo-container">
+      <div class="logo">
+        <img src="assets/favicon/android-chrome-512x512.png" alt="logo AURORA">
+      </div>
+      <span class="logo-text" *ngIf="!isCollapsed">Aurora</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <ul class="menu-list">
+      <li *ngFor="let item of menuItems" class="menu-item">
+        <a [routerLink]="item.route" 
+           routerLinkActive="active" 
+           [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+           class="menu-link"
+           (click)="onMenuClick()">
+          <i class="pi {{ item.icon }} menu-icon"></i>
+          <span class="menu-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="logout-btn" (click)="onLogout()">
+      <i class="pi pi-sign-out menu-icon"></i>
+      <span class="menu-label" *ngIf="!isCollapsed">Sair</span>
+    </button>
+  </div>
+</aside>

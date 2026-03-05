@@ -24,6 +24,9 @@ type SensorRepository interface {
 	// FindByOwnerID busca sensores pelo ID do proprietário
 	FindByOwnerID(ownerID string) ([]*Sensor, error)
 
+	// FindAll retorna todos os sensores (incluindo wildcard)
+	FindAll() ([]*Sensor, error)
+
 	// Save persiste um sensor
 	Save(sensor *Sensor) error
 
@@ -32,4 +35,10 @@ type SensorRepository interface {
 
 	// GetMotionRecords retorna os registros de movimento de um sensor
 	GetMotionRecords(sensorID string, limit int) ([]*MotionRecord, error)
+
+	// SaveLightRecord persiste um registro de luminosidade
+	SaveLightRecord(record *LightRecord) error
+
+	// GetLightRecords retorna os registros de luminosidade de um sensor
+	GetLightRecords(sensorID string, limit int) ([]*LightRecord, error)
 }
