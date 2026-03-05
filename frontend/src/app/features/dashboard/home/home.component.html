@@ -1,0 +1,66 @@
+<div class="home-container">
+  <header class="home-header">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-subtitle">{{ currentDate }}</p>
+  </header>
+
+  <section class="metrics-section">
+    <h2 class="section-title">Visão Geral</h2>
+    <div class="metrics-grid">
+      <app-card 
+        *ngFor="let metric of metrics"
+        [title]="metric.title"
+        [value]="metric.value"
+        [icon]="metric.icon"
+        [variant]="metric.variant">
+      </app-card>
+    </div>
+  </section>
+
+  <section class="activity-section">
+    <h2 class="section-title">Atividade Recente</h2>
+    <div class="activity-card">
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="activity-icon primary">
+            <i class="pi pi-wifi"></i>
+          </div>
+          <div class="activity-content">
+            <p class="activity-text">Movimento detectado no Hall de Entrada</p>
+            <span class="activity-time">Há 5 minutos</span>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon secondary">
+            <i class="pi pi-lightbulb"></i>
+          </div>
+          <div class="activity-content">
+            <p class="activity-text">Luz da sala ligada automaticamente</p>
+            <span class="activity-time">Há 15 minutos</span>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon dark">
+            <i class="pi pi-lock"></i>
+          </div>
+          <div class="activity-content">
+            <p class="activity-text">Porta da garagem trancada</p>
+            <span class="activity-time">Há 1 hora</span>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon base">
+            <i class="pi pi-sun"></i>
+          </div>
+          <div class="activity-content">
+            <p class="activity-text">Modo economia ativado</p>
+            <span class="activity-time">Há 2 horas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

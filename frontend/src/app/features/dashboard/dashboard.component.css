@@ -1,0 +1,49 @@
+.dashboard-layout {
+  @apply min-h-screen bg-aurora-light;
+}
+
+.sidebar-overlay {
+  @apply fixed inset-0 bg-black/50 z-40 opacity-0 pointer-events-none hidden;
+  transition: opacity 0.3s ease;
+}
+
+.dashboard-main {
+  @apply min-h-screen transition-all duration-300;
+}
+
+.dashboard-main.sidebar-expanded {
+  @apply ml-64;
+}
+
+.dashboard-main.sidebar-collapsed {
+  @apply ml-20;
+}
+
+.dashboard-main.sidebar-hidden {
+  @apply ml-0;
+}
+
+.dashboard-content {
+  @apply pt-20 p-6;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .sidebar-overlay {
+    @apply block;
+  }
+
+  .sidebar-overlay.visible {
+    @apply opacity-100 pointer-events-auto;
+  }
+
+  .dashboard-main.sidebar-expanded,
+  .dashboard-main.sidebar-collapsed,
+  .dashboard-main.sidebar-hidden {
+    @apply ml-0;
+  }
+
+  .dashboard-content {
+    @apply pt-20 p-4;
+  }
+}

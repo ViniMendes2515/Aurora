@@ -5,33 +5,46 @@ import (
 	"os"
 	"time"
 
+	"aurora/pkg/database"
 	"aurora/services/sensors-service/internal/application"
 	"aurora/services/sensors-service/internal/infrastructure/http"
 	"aurora/services/sensors-service/internal/infrastructure/messaging"
+	"aurora/services/sensors-service/internal/infrastructure/migrations"
 	"aurora/services/sensors-service/internal/infrastructure/repository"
 	"aurora/services/sensors-service/internal/infrastructure/security"
+	"aurora/services/sensors-service/internal/infrastructure/ws"
 )
 
 func main() {
-	// Configurações
-	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		jwtSecret = "default-dev-secret-key"
+	jwtSecret := getEnv("JWT_SECRET", "default-dev-secret-key")
+	serverPort := getEnv("SERVER_PORT", "8081")
+	natsURL := getEnv("NATS_URL", "nats://localhost:4222")
+	deviceAPIKey := getEnv("DEVICE_API_KEY", "aurora-device-key-2024")
+
+	dbConfig := database.Config{
+		Host:     getEnv("DB_HOST", "localhost"),
+		Port:     getEnv("DB_PORT", "5432"),
+		User:     getEnv("DB_USER", "aurora"),
+		Password: getEnv("DB_PASSWORD", "aurora_secret"),
+		DBName:   getEnv("DB_NAME", "aurora_home"),
+		SSLMode:  getEnv("DB_SSLMODE", "disable"),
 	}
 
-	serverPort := os.Getenv("SERVER_PORT")
-	if serverPort == "" {
-		serverPort = "8081"
+	db, err := database.NewPostgresConnection(dbConfig)
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	if err := migrations.RunSensorMigrations(db); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
 	}
 
-	natsURL := os.Getenv("NATS_URL")
-	if natsURL == "" {
-		natsURL = "nats://localhost:4222"
+	if err := migrations.SeedDemoSensors(db); err != nil {
+		log.Fatalf("Failed to seed demo sensors: %v", err)
 	}
 
-	// Aguardar NATS estar disponível
 	var natsConn *messaging.NATSConnection
-	var err error
 	for i := 0; i < 10; i++ {
 		natsConn, err = messaging.NewNATSConnection(natsURL)
 		if err == nil {
@@ -45,19 +58,25 @@ func main() {
 	}
 	defer natsConn.Close()
 
-	// Infraestrutura
-	sensorRepo := repository.NewMemorySensorRepository()
-	eventPublisher := messaging.NewNATSPublisher(natsConn)
+	hub := ws.NewHub()
+	sensorRepo := repository.NewPostgresSensorRepository(db)
+	eventPublisher := messaging.NewNATSPublisher(natsConn, hub)
 	jwtValidator := security.NewJWTValidator(jwtSecret)
 
-	// Application Layer
 	motionService := application.NewMotionService(sensorRepo, eventPublisher)
+	lightService := application.NewLightService(sensorRepo, eventPublisher)
 
-	// HTTP Server
-	server := http.NewServer(motionService, jwtValidator, serverPort)
+	server := http.NewServer(motionService, lightService, sensorRepo, jwtValidator, deviceAPIKey, hub, serverPort)
 
 	log.Printf("Sensors Service starting on port %s...", serverPort)
 	if err := server.Start(); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
 }

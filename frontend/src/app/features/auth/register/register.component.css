@@ -1,0 +1,87 @@
+.register-container {
+  @apply min-h-screen bg-aurora-light flex items-center justify-center p-4;
+}
+
+.register-wrapper {
+  @apply w-full max-w-md;
+}
+
+:host ::ng-deep .register-card {
+  @apply rounded-2xl shadow-2xl;
+}
+
+:host ::ng-deep .register-card .p-card-body {
+  @apply p-8;
+}
+
+.register-header {
+  @apply text-center mb-8;
+}
+
+.logo {
+  @apply w-16 h-16 bg-aurora-primary rounded-2xl flex items-center justify-center mx-auto mb-4;
+}
+
+.logo i {
+  @apply text-white text-3xl;
+}
+
+.title {
+  @apply text-3xl font-bold text-aurora-primary mb-2;
+}
+
+.subtitle {
+  @apply text-aurora-dark/70;
+}
+
+.register-form {
+  @apply space-y-5;
+}
+
+.form-group {
+  @apply flex flex-col gap-2;
+}
+
+.form-group label {
+  @apply text-aurora-dark font-medium text-sm;
+}
+
+.form-group input {
+  @apply w-full;
+}
+
+:host ::ng-deep .p-inputtext {
+  @apply rounded-xl py-3 px-4;
+}
+
+:host ::ng-deep .p-password {
+  @apply w-full;
+}
+
+:host ::ng-deep .p-password input {
+  @apply rounded-xl py-3 px-4 w-full;
+}
+
+.error-text {
+  @apply text-red-500 text-xs;
+}
+
+.submit-btn {
+  @apply bg-aurora-primary border-aurora-primary rounded-xl py-3 mt-4 font-semibold;
+}
+
+.submit-btn:hover {
+  @apply bg-aurora-secondary border-aurora-secondary;
+}
+
+.register-footer {
+  @apply text-center mt-6 text-aurora-dark/70;
+}
+
+.link {
+  @apply text-aurora-primary hover:text-aurora-secondary font-semibold no-underline;
+}
+
+:host ::ng-deep .p-message {
+  @apply rounded-xl mb-4;
+}

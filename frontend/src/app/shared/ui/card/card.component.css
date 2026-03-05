@@ -1,0 +1,52 @@
+.metric-card {
+  @apply rounded-xl shadow-lg p-6 flex items-center gap-4 transition-transform duration-300 hover:scale-105;
+}
+
+.card-primary {
+  @apply bg-aurora-primary;
+}
+
+.card-secondary {
+  @apply bg-aurora-secondary;
+}
+
+.card-base {
+  @apply bg-aurora-base;
+}
+
+.card-dark {
+  @apply bg-aurora-dark;
+}
+
+.card-icon {
+  @apply w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center;
+}
+
+.card-icon i {
+  @apply text-white text-2xl;
+}
+
+.card-content {
+  @apply flex flex-col;
+}
+
+.card-value {
+  @apply text-white text-3xl font-bold;
+}
+
+.card-title {
+  @apply text-white/80 text-sm font-medium;
+}
+
+.card-base .card-value,
+.card-base .card-title {
+  @apply text-aurora-dark;
+}
+
+.card-base .card-icon {
+  @apply bg-aurora-dark/20;
+}
+
+.card-base .card-icon i {
+  @apply text-aurora-dark;
+}

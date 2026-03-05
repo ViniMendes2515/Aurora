@@ -7,6 +7,7 @@ type SensorType string
 
 const (
 	SensorTypeMotion      SensorType = "motion"
+	SensorTypeLight       SensorType = "light"
 	SensorTypeTemperature SensorType = "temperature"
 	SensorTypeHumidity    SensorType = "humidity"
 	SensorTypeDoor        SensorType = "door"

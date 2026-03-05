@@ -1,0 +1,67 @@
+<div class="login-container">
+  <div class="login-wrapper">
+    <p-card styleClass="login-card">
+      <div class="login-header">
+        <div class="logo">
+            <img src="assets/favicon/android-chrome-512x512.png" alt="logo AURORA">
+        </div>
+        <h1 class="title">Aurora Home System</h1>
+        <p class="subtitle">Faça login para continuar</p>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-alert">
+        <i class="pi pi-exclamation-circle"></i>
+        <span>{{ errorMessage }}</span>
+        <button type="button" class="close-btn" (click)="errorMessage = ''">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input 
+            pInputText 
+            id="email" 
+            formControlName="email" 
+            placeholder="seu@email.com"
+            class="w-full"
+            [ngClass]="{'ng-invalid ng-dirty': email?.invalid && email?.touched}" />
+          <small *ngIf="email?.invalid && email?.touched" class="error-text">
+            E-mail inválido
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Senha</label>
+          <p-password 
+            id="password" 
+            formControlName="password" 
+            placeholder="Sua senha"
+            [toggleMask]="true"
+            [feedback]="false"
+            styleClass="w-full"
+            inputStyleClass="w-full">
+          </p-password>
+          <small *ngIf="password?.invalid && password?.touched" class="error-text">
+            Senha deve ter no mínimo 6 caracteres
+          </small>
+        </div>
+
+        <button 
+          pButton 
+          type="submit" 
+          label="Entrar" 
+          [loading]="loading"
+          class="submit-btn w-full">
+        </button>
+      </form>
+
+      <div class="login-footer">
+        <p>Não tem uma conta? 
+          <a routerLink="/register" class="link">Criar conta</a>
+        </p>
+      </div>
+    </p-card>
+  </div>
+</div>

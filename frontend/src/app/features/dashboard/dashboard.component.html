@@ -1,0 +1,31 @@
+<div class="dashboard-layout">
+  <!-- Overlay para mobile -->
+  <div 
+    class="sidebar-overlay" 
+    [class.visible]="isSidebarOpen && !isSidebarCollapsed"
+    (click)="closeSidebar()">
+  </div>
+
+  <app-sidebar 
+    [isOpen]="isSidebarOpen"
+    [isCollapsed]="isSidebarCollapsed"
+    (logout)="onLogout()"
+    (menuClick)="closeSidebar()">
+  </app-sidebar>
+
+  <div class="dashboard-main" 
+       [class.sidebar-expanded]="isSidebarOpen && !isSidebarCollapsed"
+       [class.sidebar-collapsed]="isSidebarOpen && isSidebarCollapsed"
+       [class.sidebar-hidden]="!isSidebarOpen">
+    <app-navbar 
+      [userEmail]="userEmail" 
+      [isSidebarOpen]="isSidebarOpen"
+      [isSidebarCollapsed]="isSidebarCollapsed"
+      (toggleSidebar)="toggleSidebar()">
+    </app-navbar>
+
+    <main class="dashboard-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

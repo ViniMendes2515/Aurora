@@ -1,0 +1,10 @@
+<button 
+  [type]="type"
+  class="aurora-btn"
+  [ngClass]="['btn-' + variant, 'btn-' + size]"
+  [disabled]="disabled || loading"
+  (click)="onClick()">
+  <i *ngIf="loading" class="pi pi-spinner pi-spin"></i>
+  <i *ngIf="icon && !loading" class="pi {{ icon }}"></i>
+  <span *ngIf="label">{{ label }}</span>
+</button>
