@@ -1,13 +1,13 @@
 package http
 
 import (
-	"encoding/json"
 	"net/http"
-	"strings"
 
 	"aurora/services/lighting-service/internal/application"
 	"aurora/services/lighting-service/internal/domain"
 	"aurora/services/lighting-service/internal/infrastructure/device"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Handlers contém os handlers HTTP do lighting-service
@@ -26,106 +26,75 @@ func NewHandlers(lightService *application.LightService, esp32Client *device.ESP
 	}
 }
 
-// ErrorResponse representa uma resposta de erro
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
-
 // ListLights handler para GET /lights
-func (h *Handlers) ListLights(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		h.respondWithError(w, http.StatusMethodNotAllowed, "method not allowed")
-		return
-	}
-
-	userID := r.Context().Value(UserIDKey).(string)
+func (h *Handlers) ListLights(c *gin.Context) {
+	userID := c.GetString("userID")
 	lights, err := h.lightService.ListLights(userID)
 	if err != nil {
-		h.respondWithError(w, http.StatusInternalServerError, "failed to fetch lights")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch lights"})
 		return
 	}
-
-	h.respondWithJSON(w, http.StatusOK, lights)
+	c.JSON(http.StatusOK, lights)
 }
 
-// TurnOn handler para POST /lights/{id}/on
-func (h *Handlers) TurnOn(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		h.respondWithError(w, http.StatusMethodNotAllowed, "method not allowed")
-		return
-	}
-
-	lightID := extractLightID(r.URL.Path)
+// TurnOn handler para POST /lights/:id/on
+func (h *Handlers) TurnOn(c *gin.Context) {
+	lightID := c.Param("id")
 	if lightID == "" {
-		h.respondWithError(w, http.StatusBadRequest, "light ID is required")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "light ID is required"})
 		return
 	}
 
-	userID := r.Context().Value(UserIDKey).(string)
+	userID := c.GetString("userID")
 	response, err := h.lightService.TurnOn(lightID, userID)
 	if err != nil {
-		h.handleDomainError(w, err)
+		h.handleDomainError(c, err)
 		return
 	}
 
-	h.respondWithJSON(w, http.StatusOK, response)
+	c.JSON(http.StatusOK, response)
 }
 
-// TurnOff handler para POST /lights/{id}/off
-func (h *Handlers) TurnOff(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		h.respondWithError(w, http.StatusMethodNotAllowed, "method not allowed")
-		return
-	}
-
-	lightID := extractLightID(r.URL.Path)
+// TurnOff handler para POST /lights/:id/off
+func (h *Handlers) TurnOff(c *gin.Context) {
+	lightID := c.Param("id")
 	if lightID == "" {
-		h.respondWithError(w, http.StatusBadRequest, "light ID is required")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "light ID is required"})
 		return
 	}
 
-	userID := r.Context().Value(UserIDKey).(string)
+	userID := c.GetString("userID")
 	response, err := h.lightService.TurnOff(lightID, userID)
 	if err != nil {
-		h.handleDomainError(w, err)
+		h.handleDomainError(c, err)
 		return
 	}
 
-	h.respondWithJSON(w, http.StatusOK, response)
+	c.JSON(http.StatusOK, response)
 }
 
-// GetLightStatus handler para GET /lights/{id}/status
-func (h *Handlers) GetLightStatus(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		h.respondWithError(w, http.StatusMethodNotAllowed, "method not allowed")
-		return
-	}
-
-	lightID := extractLightID(r.URL.Path)
+// GetLightStatus handler para GET /lights/:id/status
+func (h *Handlers) GetLightStatus(c *gin.Context) {
+	lightID := c.Param("id")
 	if lightID == "" {
-		h.respondWithError(w, http.StatusBadRequest, "light ID is required")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "light ID is required"})
 		return
 	}
 
-	userID := r.Context().Value(UserIDKey).(string)
+	userID := c.GetString("userID")
 	response, err := h.lightService.GetStatus(lightID, userID)
 	if err != nil {
-		h.handleDomainError(w, err)
+		h.handleDomainError(c, err)
 		return
 	}
 
-	h.respondWithJSON(w, http.StatusOK, response)
+	c.JSON(http.StatusOK, response)
 }
 
 // RegisterDevice handler para POST /devices/register (ESP32 registra seu IP)
-func (h *Handlers) RegisterDevice(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		h.respondWithError(w, http.StatusMethodNotAllowed, "method not allowed")
-		return
-	}
-
-	if r.Header.Get("X-Device-Key") != h.deviceAPIKey {
-		h.respondWithError(w, http.StatusUnauthorized, "invalid device key")
+func (h *Handlers) RegisterDevice(c *gin.Context) {
+	if c.GetHeader("X-Device-Key") != h.deviceAPIKey {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid device key"})
 		return
 	}
 
@@ -134,8 +103,8 @@ func (h *Handlers) RegisterDevice(w http.ResponseWriter, r *http.Request) {
 		IP       string `json:"ip"`
 		Port     int    `json:"port"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		h.respondWithError(w, http.StatusBadRequest, "invalid request body")
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -150,43 +119,24 @@ func (h *Handlers) RegisterDevice(w http.ResponseWriter, r *http.Request) {
 	}
 	h.esp32Client.Register(dev)
 
-	h.respondWithJSON(w, http.StatusOK, map[string]string{
+	c.JSON(http.StatusOK, gin.H{
 		"status":    "registered",
 		"device_id": body.DeviceID,
 		"ip":        body.IP,
 	})
 }
 
-func extractLightID(path string) string {
-	path = strings.TrimPrefix(path, "/lights/")
-	parts := strings.Split(path, "/")
-	if len(parts) >= 1 && parts[0] != "" {
-		return parts[0]
-	}
-	return ""
-}
-
-func (h *Handlers) handleDomainError(w http.ResponseWriter, err error) {
+func (h *Handlers) handleDomainError(c *gin.Context, err error) {
 	switch err {
 	case domain.ErrLightNotFound:
-		h.respondWithError(w, http.StatusNotFound, err.Error())
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	case domain.ErrLightAccessDenied:
-		h.respondWithError(w, http.StatusForbidden, err.Error())
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 	case domain.ErrInvalidLightID:
-		h.respondWithError(w, http.StatusBadRequest, err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	case domain.ErrDeviceUnreachable:
-		h.respondWithError(w, http.StatusServiceUnavailable, err.Error())
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": err.Error()})
 	default:
-		h.respondWithError(w, http.StatusInternalServerError, "internal server error")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 	}
-}
-
-func (h *Handlers) respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(payload)
-}
-
-func (h *Handlers) respondWithError(w http.ResponseWriter, code int, message string) {
-	h.respondWithJSON(w, code, ErrorResponse{Error: message})
 }

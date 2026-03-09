@@ -2,10 +2,11 @@ package http
 
 import (
 	"log"
-	"net/http"
 
 	"aurora/services/security-service/internal/application"
 	"aurora/services/security-service/internal/infrastructure/security"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Server representa o servidor HTTP do security-service
@@ -26,10 +27,13 @@ func NewServer(alarmService *application.AlarmService, jwtValidator *security.JW
 	}
 }
 
-// Start inicia o servidor HTTP
+// Start inicia o servidor HTTP com Gin
 func (s *Server) Start() error {
-	mux := http.NewServeMux()
-	RegisterRoutes(mux, s.alarmService, s.jwtValidator, s.deviceAPIKey)
+	router := gin.New()
+	router.Use(gin.Logger(), gin.Recovery())
+
+	RegisterRoutes(router, s.alarmService, s.jwtValidator, s.deviceAPIKey)
+
 	log.Printf("Security Service listening on :%s", s.port)
-	return http.ListenAndServe(":"+s.port, mux)
+	return router.Run(":" + s.port)
 }

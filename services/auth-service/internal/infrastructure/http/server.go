@@ -2,9 +2,10 @@ package http
 
 import (
 	"log"
-	"net/http"
 
 	"aurora/services/auth-service/internal/application"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Server representa o servidor HTTP
@@ -21,13 +22,13 @@ func NewServer(authService *application.AuthService, port string) *Server {
 	}
 }
 
-// Start inicia o servidor HTTP
+// Start inicia o servidor HTTP com Gin
 func (s *Server) Start() error {
-	mux := http.NewServeMux()
+	router := gin.New()
+	router.Use(gin.Logger(), gin.Recovery())
 
-	// Registrar rotas
-	RegisterRoutes(mux, s.authService)
+	RegisterRoutes(router, s.authService)
 
-	log.Printf("Server listening on :%s", s.port)
-	return http.ListenAndServe(":"+s.port, mux)
+	log.Printf("Auth Service listening on :%s", s.port)
+	return router.Run(":" + s.port)
 }

@@ -2,12 +2,13 @@ package http
 
 import (
 	"log"
-	"net/http"
 
 	"aurora/services/lighting-service/internal/application"
 	"aurora/services/lighting-service/internal/infrastructure/device"
 	"aurora/services/lighting-service/internal/infrastructure/security"
 	"aurora/services/lighting-service/internal/infrastructure/ws"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Server representa o servidor HTTP
@@ -32,10 +33,13 @@ func NewServer(lightService *application.LightService, esp32Client *device.ESP32
 	}
 }
 
-// Start inicia o servidor HTTP
+// Start inicia o servidor HTTP com Gin
 func (s *Server) Start() error {
-	mux := http.NewServeMux()
-	RegisterRoutes(mux, s.lightService, s.esp32Client, s.jwtValidator, s.deviceAPIKey, s.hub)
+	router := gin.New()
+	router.Use(gin.Logger(), gin.Recovery())
+
+	RegisterRoutes(router, s.lightService, s.esp32Client, s.jwtValidator, s.deviceAPIKey, s.hub)
+
 	log.Printf("Lighting Service listening on :%s", s.port)
-	return http.ListenAndServe(":"+s.port, mux)
+	return router.Run(":" + s.port)
 }

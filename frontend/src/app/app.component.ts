@@ -5,8 +5,7 @@ import { RouterOutlet } from '@angular/router';
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet],
-  template: '<router-outlet></router-outlet>',
-  styles: []
+  templateUrl: './app.component.html'
 })
 export class AppComponent {
   title = 'Aurora Home System';
