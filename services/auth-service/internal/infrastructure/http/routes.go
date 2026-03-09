@@ -4,22 +4,22 @@ import (
 	"net/http"
 
 	"aurora/services/auth-service/internal/application"
+
+	"github.com/gin-gonic/gin"
 )
 
 // RegisterRoutes registra todas as rotas do auth-service
-func RegisterRoutes(mux *http.ServeMux, authService *application.AuthService) {
+func RegisterRoutes(router *gin.Engine, authService *application.AuthService) {
 	handlers := NewHandlers(authService)
 
-	// Auth routes
-	mux.HandleFunc("/auth/register", handlers.Register)
-	mux.HandleFunc("/auth/login", handlers.Login)
+	// Grupo /auth agrupa register e login sem middleware (endpoints públicos)
+	auth := router.Group("/auth")
+	{
+		auth.POST("/register", handlers.Register)
+		auth.POST("/login", handlers.Login)
+	}
 
-	// Health check
-	mux.HandleFunc("/health", healthCheck)
-}
-
-func healthCheck(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"status":"healthy","service":"auth-service"}`))
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "healthy", "service": "auth-service"})
+	})
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"sync"
@@ -272,17 +273,17 @@ func (e *RulesEngine) executeAction(rule *domain.Rule) {
 	}
 
 	client := &http.Client{Timeout: 3 * time.Second}
-	var buf *bytes.Reader
+	var bodyReader io.Reader = http.NoBody
 	if body != nil {
 		data, err := json.Marshal(body)
 		if err != nil {
 			log.Printf("[RulesEngine] Failed to marshal action body: %v", err)
 			return
 		}
-		buf = bytes.NewReader(data)
+		bodyReader = bytes.NewReader(data)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, url, buf)
+	req, err := http.NewRequest(http.MethodPost, url, bodyReader)
 	if err != nil {
 		log.Printf("[RulesEngine] Failed to create request: %v", err)
 		return

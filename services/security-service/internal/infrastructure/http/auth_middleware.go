@@ -1,63 +1,46 @@
 package http
 
 import (
-	"context"
 	"net/http"
 	"strings"
 
 	"aurora/services/security-service/internal/infrastructure/security"
+
+	"github.com/gin-gonic/gin"
 )
 
-// ContextKey tipo para chaves de contexto
-type ContextKey string
-
-const (
-	UserIDKey ContextKey = "userID"
-	EmailKey  ContextKey = "email"
-)
-
-// AuthMiddleware middleware de autenticação JWT e opcionalmente X-Device-Key (regras/automação)
-type AuthMiddleware struct {
-	jwtValidator *security.JWTValidator
-	deviceAPIKey string
-}
-
-// NewAuthMiddleware cria uma nova instância de AuthMiddleware
-func NewAuthMiddleware(jwtValidator *security.JWTValidator, deviceAPIKey string) *AuthMiddleware {
-	return &AuthMiddleware{jwtValidator: jwtValidator, deviceAPIKey: deviceAPIKey}
-}
-
-// Authenticate middleware: aceita JWT ou X-Device-Key (para chamadas do rules-service)
-func (m *AuthMiddleware) Authenticate(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Primeiro, aceita chamadas internas autenticadas via X-Device-Key
-		if m.deviceAPIKey != "" && r.Header.Get("X-Device-Key") == m.deviceAPIKey {
-			ctx := context.WithValue(r.Context(), UserIDKey, "*")
-			next.ServeHTTP(w, r.WithContext(ctx))
+// NewAuthMiddleware retorna um gin.HandlerFunc que aceita JWT ou X-Device-Key.
+// X-Device-Key permite chamadas internas do rules-service sem JWT.
+func NewAuthMiddleware(jwtValidator *security.JWTValidator, deviceAPIKey string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Autenticação por chave de dispositivo (chamadas internas)
+		if deviceAPIKey != "" && c.GetHeader("X-Device-Key") == deviceAPIKey {
+			c.Set("userID", "*")
+			c.Next()
 			return
 		}
 
-		// Fallback: exige JWT para chamadas externas (frontend)
-		authHeader := r.Header.Get("Authorization")
+		// Autenticação por JWT (chamadas do frontend)
+		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			http.Error(w, `{"error":"missing authorization header"}`, http.StatusUnauthorized)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing authorization header"})
 			return
 		}
 
-		parts := strings.Split(authHeader, " ")
+		parts := strings.SplitN(authHeader, " ", 2)
 		if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
-			http.Error(w, `{"error":"invalid authorization header format"}`, http.StatusUnauthorized)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization header format"})
 			return
 		}
 
-		claims, err := m.jwtValidator.ValidateToken(parts[1])
+		claims, err := jwtValidator.ValidateToken(parts[1])
 		if err != nil {
-			http.Error(w, `{"error":"invalid or expired token"}`, http.StatusUnauthorized)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid or expired token"})
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), UserIDKey, claims.UserID)
-		ctx = context.WithValue(ctx, EmailKey, claims.Email)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+		c.Set("userID", claims.UserID)
+		c.Set("email", claims.Email)
+		c.Next()
+	}
 }

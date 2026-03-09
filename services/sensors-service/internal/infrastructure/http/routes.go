@@ -7,65 +7,37 @@ import (
 	"aurora/services/sensors-service/internal/domain"
 	"aurora/services/sensors-service/internal/infrastructure/security"
 	"aurora/services/sensors-service/internal/infrastructure/ws"
+
+	"github.com/gin-gonic/gin"
 )
 
 // RegisterRoutes registra todas as rotas do sensors-service
-func RegisterRoutes(mux *http.ServeMux, motionService *application.MotionService, lightService *application.LightService, sensorRepo domain.SensorRepository, jwtValidator *security.JWTValidator, deviceAPIKey string, hub *ws.Hub) {
+func RegisterRoutes(router *gin.Engine, motionService *application.MotionService, lightService *application.LightService, sensorRepo domain.SensorRepository, jwtValidator *security.JWTValidator, deviceAPIKey string, hub *ws.Hub) {
 	handlers := NewHandlers(motionService, lightService, sensorRepo, deviceAPIKey)
 	authMiddleware := NewAuthMiddleware(jwtValidator)
 
-	// Rotas de dispositivos (API Key — sem JWT)
-	mux.HandleFunc("/sensors/device/", func(w http.ResponseWriter, r *http.Request) {
-		if containsPath(r.URL.Path, "/motion") {
-			handlers.RegisterDeviceMotion(w, r)
-		} else if containsPath(r.URL.Path, "/light") {
-			handlers.RegisterDeviceLight(w, r)
-		} else {
-			http.NotFound(w, r)
-		}
-	})
-
-	// WebSocket para stream em tempo real de eventos de sensores
-	mux.HandleFunc("/ws", hub.ServeWS)
-
-	// Rotas protegidas por JWT
-	mux.Handle("/sensors", authMiddleware.Authenticate(http.HandlerFunc(handlers.ListSensors)))
-	mux.Handle("/sensors/", authMiddleware.Authenticate(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if containsPath(r.URL.Path, "/motion") && r.Method == http.MethodPost {
-			handlers.RegisterMotion(w, r)
-		} else if containsPath(r.URL.Path, "/motion") && r.Method == http.MethodGet {
-			handlers.GetMotionHistory(w, r)
-		} else if containsPath(r.URL.Path, "/light") && r.Method == http.MethodGet {
-			handlers.GetLightHistory(w, r)
-		} else {
-			http.NotFound(w, r)
-		}
-	})))
-
-	// Health check
-	mux.HandleFunc("/health", healthCheck)
-}
-
-func containsPath(path, segment string) bool {
-	return len(path) > len(segment) && path[len(path)-len(segment):] == segment ||
-		contains(path, segment+"/") || contains(path, "/"+segment)
-}
-
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > 0 && containsStr(s, substr))
-}
-
-func containsStr(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
+	// Endpoints para dispositivos físicos (autenticação via X-Device-Key no handler)
+	device := router.Group("/sensors/device")
+	{
+		device.POST("/:id/motion", handlers.RegisterDeviceMotion)
+		device.POST("/:id/light", handlers.RegisterDeviceLight)
 	}
-	return false
-}
 
-func healthCheck(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"status":"healthy","service":"sensors-service"}`))
+	// WebSocket para stream em tempo real (sem JWT — o frontend conecta diretamente)
+	// gin.WrapF adapta func(http.ResponseWriter, *http.Request) para gin.HandlerFunc
+	router.GET("/ws", gin.WrapF(hub.ServeWS))
+
+	// Endpoints protegidos por JWT
+	sensors := router.Group("/sensors")
+	sensors.Use(authMiddleware)
+	{
+		sensors.GET("", handlers.ListSensors)
+		sensors.POST("/:id/motion", handlers.RegisterMotion)
+		sensors.GET("/:id/motion", handlers.GetMotionHistory)
+		sensors.GET("/:id/light", handlers.GetLightHistory)
+	}
+
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "healthy", "service": "sensors-service"})
+	})
 }

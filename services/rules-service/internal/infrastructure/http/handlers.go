@@ -1,12 +1,12 @@
 package http
 
 import (
-	"encoding/json"
 	"net/http"
-	"strings"
 
 	"aurora/services/rules-service/internal/application"
 	"aurora/services/rules-service/internal/domain"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Handlers contém os handlers HTTP do rules-service
@@ -19,40 +19,24 @@ func NewHandlers(rulesEngine *application.RulesEngine) *Handlers {
 	return &Handlers{rulesEngine: rulesEngine}
 }
 
-// ErrorResponse representa uma resposta de erro
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
-
 // ListRules handler para GET /rules
-func (h *Handlers) ListRules(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		h.respondWithError(w, http.StatusMethodNotAllowed, "method not allowed")
-		return
-	}
-
-	userID := r.Context().Value(UserIDKey).(string)
+func (h *Handlers) ListRules(c *gin.Context) {
+	userID := c.GetString("userID")
 	rules, err := h.rulesEngine.ListRules(userID)
 	if err != nil {
-		h.respondWithError(w, http.StatusInternalServerError, "failed to fetch rules")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch rules"})
 		return
 	}
-
-	h.respondWithJSON(w, http.StatusOK, rules)
+	c.JSON(http.StatusOK, rules)
 }
 
 // CreateRule handler para POST /rules
-func (h *Handlers) CreateRule(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		h.respondWithError(w, http.StatusMethodNotAllowed, "method not allowed")
-		return
-	}
-
-	userID := r.Context().Value(UserIDKey).(string)
+func (h *Handlers) CreateRule(c *gin.Context) {
+	userID := c.GetString("userID")
 
 	var req application.CreateRuleRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.respondWithError(w, http.StatusBadRequest, "invalid request body")
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
 	req.OwnerID = userID
@@ -61,63 +45,53 @@ func (h *Handlers) CreateRule(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case domain.ErrInvalidRule:
-			h.respondWithError(w, http.StatusBadRequest, err.Error())
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		default:
-			h.respondWithError(w, http.StatusInternalServerError, "failed to create rule")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create rule"})
 		}
 		return
 	}
 
-	h.respondWithJSON(w, http.StatusCreated, response)
+	c.JSON(http.StatusCreated, response)
 }
 
-// DeleteRule handler para DELETE /rules/{id}
-func (h *Handlers) DeleteRule(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		h.respondWithError(w, http.StatusMethodNotAllowed, "method not allowed")
-		return
-	}
-
-	ruleID := extractRuleID(r.URL.Path)
+// DeleteRule handler para DELETE /rules/:id
+func (h *Handlers) DeleteRule(c *gin.Context) {
+	ruleID := c.Param("id")
 	if ruleID == "" {
-		h.respondWithError(w, http.StatusBadRequest, "rule ID is required")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "rule ID is required"})
 		return
 	}
 
-	userID := r.Context().Value(UserIDKey).(string)
+	userID := c.GetString("userID")
 	if err := h.rulesEngine.DeleteRule(ruleID, userID); err != nil {
 		switch err {
 		case domain.ErrRuleNotFound:
-			h.respondWithError(w, http.StatusNotFound, err.Error())
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		case domain.ErrRuleAccessDenied:
-			h.respondWithError(w, http.StatusForbidden, err.Error())
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 		default:
-			h.respondWithError(w, http.StatusInternalServerError, "failed to delete rule")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete rule"})
 		}
 		return
 	}
 
-	h.respondWithJSON(w, http.StatusOK, map[string]string{"status": "deleted"})
+	c.JSON(http.StatusOK, gin.H{"status": "deleted"})
 }
 
-// UpdateRule handler para PUT /rules/{id}
-func (h *Handlers) UpdateRule(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPut {
-		h.respondWithError(w, http.StatusMethodNotAllowed, "method not allowed")
-		return
-	}
-
-	ruleID := extractRuleID(r.URL.Path)
+// UpdateRule handler para PUT /rules/:id
+func (h *Handlers) UpdateRule(c *gin.Context) {
+	ruleID := c.Param("id")
 	if ruleID == "" {
-		h.respondWithError(w, http.StatusBadRequest, "rule ID is required")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "rule ID is required"})
 		return
 	}
 
-	userID := r.Context().Value(UserIDKey).(string)
+	userID := c.GetString("userID")
 
 	var req application.CreateRuleRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.respondWithError(w, http.StatusBadRequest, "invalid request body")
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -125,35 +99,16 @@ func (h *Handlers) UpdateRule(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case domain.ErrRuleNotFound:
-			h.respondWithError(w, http.StatusNotFound, err.Error())
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		case domain.ErrRuleAccessDenied:
-			h.respondWithError(w, http.StatusForbidden, err.Error())
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 		case domain.ErrInvalidRule:
-			h.respondWithError(w, http.StatusBadRequest, err.Error())
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		default:
-			h.respondWithError(w, http.StatusInternalServerError, "failed to update rule")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update rule"})
 		}
 		return
 	}
 
-	h.respondWithJSON(w, http.StatusOK, resp)
-}
-
-func extractRuleID(path string) string {
-	path = strings.TrimPrefix(path, "/rules/")
-	parts := strings.Split(path, "/")
-	if len(parts) >= 1 && parts[0] != "" {
-		return parts[0]
-	}
-	return ""
-}
-
-func (h *Handlers) respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(payload)
-}
-
-func (h *Handlers) respondWithError(w http.ResponseWriter, code int, message string) {
-	h.respondWithJSON(w, code, ErrorResponse{Error: message})
+	c.JSON(http.StatusOK, resp)
 }

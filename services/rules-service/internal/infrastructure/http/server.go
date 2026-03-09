@@ -2,10 +2,11 @@ package http
 
 import (
 	"log"
-	"net/http"
 
 	"aurora/services/rules-service/internal/application"
 	"aurora/services/rules-service/internal/infrastructure/security"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Server representa o servidor HTTP do rules-service
@@ -24,10 +25,13 @@ func NewServer(rulesEngine *application.RulesEngine, jwtValidator *security.JWTV
 	}
 }
 
-// Start inicia o servidor HTTP
+// Start inicia o servidor HTTP com Gin
 func (s *Server) Start() error {
-	mux := http.NewServeMux()
-	RegisterRoutes(mux, s.rulesEngine, s.jwtValidator)
+	router := gin.New()
+	router.Use(gin.Logger(), gin.Recovery())
+
+	RegisterRoutes(router, s.rulesEngine, s.jwtValidator)
+
 	log.Printf("Rules Service listening on :%s", s.port)
-	return http.ListenAndServe(":"+s.port, mux)
+	return router.Run(":" + s.port)
 }

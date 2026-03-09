@@ -2,12 +2,13 @@ package http
 
 import (
 	"log"
-	"net/http"
 
 	"aurora/services/sensors-service/internal/application"
 	"aurora/services/sensors-service/internal/domain"
 	"aurora/services/sensors-service/internal/infrastructure/security"
 	"aurora/services/sensors-service/internal/infrastructure/ws"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Server representa o servidor HTTP
@@ -34,12 +35,13 @@ func NewServer(motionService *application.MotionService, lightService *applicati
 	}
 }
 
-// Start inicia o servidor HTTP
+// Start inicia o servidor HTTP com Gin
 func (s *Server) Start() error {
-	mux := http.NewServeMux()
+	router := gin.New()
+	router.Use(gin.Logger(), gin.Recovery())
 
-	RegisterRoutes(mux, s.motionService, s.lightService, s.sensorRepo, s.jwtValidator, s.deviceAPIKey, s.hub)
+	RegisterRoutes(router, s.motionService, s.lightService, s.sensorRepo, s.jwtValidator, s.deviceAPIKey, s.hub)
 
 	log.Printf("Sensors Service listening on :%s", s.port)
-	return http.ListenAndServe(":"+s.port, mux)
+	return router.Run(":" + s.port)
 }
