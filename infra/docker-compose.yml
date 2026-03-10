@@ -164,6 +164,33 @@ services:
     networks:
       - aurora-network
 
+  notifications-service:
+    build:
+      context: ..
+      dockerfile: services/notifications-service/Dockerfile
+    container_name: aurora-notifications-service
+    ports:
+      - "8085:8085"
+    environment:
+      - JWT_SECRET=aurora-super-secret-key-2024
+      - SERVER_PORT=8085
+      - NATS_URL=nats://nats:4222
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=aurora
+      - DB_PASSWORD=aurora_secret
+      - DB_NAME=aurora_home
+      - DB_SSLMODE=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+      sensors-service:
+        condition: service_started
+    networks:
+      - aurora-network
+
   frontend:
     build:
       context: ../frontend

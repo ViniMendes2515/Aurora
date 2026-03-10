@@ -1,9 +1,9 @@
 package domain_test
 
 import (
-"testing"
+	"testing"
 
-"aurora/services/auth-service/internal/domain"
+	"aurora/services/auth-service/internal/domain"
 )
 
 func TestNewUser_CamposPreenchidos(t *testing.T) {
@@ -49,7 +49,7 @@ func TestValidateEmail(t *testing.T) {
 
 	for _, tt := range testes {
 		t.Run(tt.nome, func(t *testing.T) {
-u := &domain.User{Email: tt.email}
+			u := &domain.User{Email: tt.email}
 			err := u.ValidateEmail()
 			if (err != nil) != tt.comErro {
 				t.Errorf("ValidateEmail() erro = %v, esperado erro = %v", err, tt.comErro)
