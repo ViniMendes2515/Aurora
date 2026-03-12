@@ -1,13 +1,13 @@
 #pragma once
 
-#define WIFI_SSID       "DEBORA_MENDES"
-#define WIFI_PASSWORD   "1QAZ2wsx12!"
+#define WIFI_SSID       "SEU_SSID_AQUI"
+#define WIFI_PASSWORD   "SUA_SENHA_AQUI"
 
 // ============================================================
 // Endereço IP do computador onde os serviços estão rodando
 // ============================================================
-#define SENSORS_SERVICE_URL   "http://192.168.0.160/api/sensors"
-#define LIGHTING_SERVICE_URL  "http://192.168.0.160/api/lighting"
+#define SENSORS_SERVICE_URL   "http://IP_DO_SERVIDOR/api/sensors"
+#define LIGHTING_SERVICE_URL  "http://IP_DO_SERVIDOR/api/lighting"
 
 #define DEVICE_API_KEY  "aurora-device-key-2024"
 
