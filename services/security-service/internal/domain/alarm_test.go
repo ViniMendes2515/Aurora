@@ -7,12 +7,15 @@ import (
 )
 
 func TestNewAlarmEvent_CamposPreenchidos(t *testing.T) {
-	a := domain.NewAlarmEvent("motion", "sensor1", "sala")
+	a, err := domain.NewAlarmEvent("motion", "sensor1", "sala")
+	if err != nil {
+		t.Fatalf("NewAlarmEvent() erro inesperado: %v", err)
+	}
 	if a.ID == "" {
 		t.Error("ID nao deve ser vazio")
 	}
-	if a.TriggerType != "motion" {
-		t.Errorf("TriggerType esperado motion, obteve %s", a.TriggerType)
+	if a.TriggerType.String() != "motion" {
+		t.Errorf("TriggerType esperado motion, obteve %s", a.TriggerType.String())
 	}
 	if a.Status != domain.AlarmStatusTriggered {
 		t.Errorf("Status inicial deve ser triggered, obteve %s", a.Status)
@@ -26,15 +29,15 @@ func TestNewAlarmEvent_CamposPreenchidos(t *testing.T) {
 }
 
 func TestNewAlarmEvent_IDUnico(t *testing.T) {
-	a1 := domain.NewAlarmEvent("motion", "s1", "sala")
-	a2 := domain.NewAlarmEvent("motion", "s2", "quarto")
+	a1, _ := domain.NewAlarmEvent("motion", "s1", "sala")
+	a2, _ := domain.NewAlarmEvent("motion", "s2", "quarto")
 	if a1.ID == a2.ID {
 		t.Error("IDs de alarmes distintos nao devem ser iguais")
 	}
 }
 
 func TestAlarmEvent_Silence(t *testing.T) {
-	a := domain.NewAlarmEvent("manual", "sensor1", "quarto")
+	a, _ := domain.NewAlarmEvent("manual", "sensor1", "quarto")
 	a.Silence()
 	if a.Status != domain.AlarmStatusSilenced {
 		t.Errorf("Status deve ser silenced apos Silence(), obteve %s", a.Status)
@@ -45,9 +48,9 @@ func TestAlarmEvent_Silence(t *testing.T) {
 }
 
 func TestAlarmEvent_Silence_PreservaTriggerType(t *testing.T) {
-	a := domain.NewAlarmEvent("motion", "sensor1", "sala")
+	a, _ := domain.NewAlarmEvent("motion", "sensor1", "sala")
 	a.Silence()
-	if a.TriggerType != "motion" {
-		t.Errorf("Silence nao deve alterar TriggerType, obteve %s", a.TriggerType)
+	if a.TriggerType.String() != "motion" {
+		t.Errorf("Silence nao deve alterar TriggerType, obteve %s", a.TriggerType.String())
 	}
 }

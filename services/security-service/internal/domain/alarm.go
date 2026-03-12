@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	ErrAlarmNotFound    = errors.New("alarm event not found")
+	ErrAlarmNotFound     = errors.New("alarm event not found")
 	ErrDeviceUnreachable = errors.New("device unreachable")
 )
 
@@ -21,7 +21,7 @@ const (
 // AlarmEvent representa um evento de acionamento de alarme
 type AlarmEvent struct {
 	ID          string
-	TriggerType string // "motion", "manual"
+	TriggerType AlarmTriggerType
 	SensorID    string
 	Location    string
 	Status      AlarmStatus
@@ -29,16 +29,22 @@ type AlarmEvent struct {
 	SilencedAt  *time.Time
 }
 
-// NewAlarmEvent cria um novo evento de alarme
-func NewAlarmEvent(triggerType, sensorID, location string) *AlarmEvent {
+// NewAlarmEvent cria um novo evento de alarme. Retorna erro se triggerType for inválido.
+func NewAlarmEvent(triggerType, sensorID, location string) (*AlarmEvent, error) {
+	tt, err := NewAlarmTriggerType(triggerType)
+
+	if err != nil {
+		return nil, err
+	}
+
 	return &AlarmEvent{
 		ID:          newID(),
-		TriggerType: triggerType,
+		TriggerType: tt,
 		SensorID:    sensorID,
 		Location:    location,
 		Status:      AlarmStatusTriggered,
 		TriggeredAt: time.Now(),
-	}
+	}, nil
 }
 
 // Silence silencia o alarme

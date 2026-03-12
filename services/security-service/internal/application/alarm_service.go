@@ -38,7 +38,7 @@ type AlarmResponse struct {
 func toResponse(a *domain.AlarmEvent) *AlarmResponse {
 	return &AlarmResponse{
 		ID:          a.ID,
-		TriggerType: a.TriggerType,
+		TriggerType: a.TriggerType.String(),
 		SensorID:    a.SensorID,
 		Location:    a.Location,
 		Status:      a.Status,
@@ -48,7 +48,10 @@ func toResponse(a *domain.AlarmEvent) *AlarmResponse {
 
 // TriggerAlarm aciona o alarme (chamado pelo subscriber NATS ou por API)
 func (s *AlarmService) TriggerAlarm(triggerType, sensorID, location string) (*AlarmResponse, error) {
-	event := domain.NewAlarmEvent(triggerType, sensorID, location)
+	event, err := domain.NewAlarmEvent(triggerType, sensorID, location)
+	if err != nil {
+		return nil, err
+	}
 
 	if err := s.alarmRepo.Save(event); err != nil {
 		return nil, err

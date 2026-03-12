@@ -27,7 +27,7 @@ func (r *PostgresAlarmRepository) Save(event *domain.AlarmEvent) error {
 	`
 	_, err := r.db.Exec(query,
 		event.ID,
-		event.TriggerType,
+		event.TriggerType.String(),
 		event.SensorID,
 		event.Location,
 		string(event.Status),
@@ -43,18 +43,29 @@ func (r *PostgresAlarmRepository) FindByID(id string) (*domain.AlarmEvent, error
 		SELECT id, trigger_type, sensor_id, location, status, triggered_at, silenced_at
 		FROM alarm_events WHERE id = $1
 	`
+	var triggerTypeStr, status string
+
 	event := &domain.AlarmEvent{}
-	var status string
+
 	err := r.db.QueryRow(query, id).Scan(
-		&event.ID, &event.TriggerType, &event.SensorID, &event.Location,
+		&event.ID, &triggerTypeStr, &event.SensorID, &event.Location,
 		&status, &event.TriggeredAt, &event.SilencedAt,
 	)
+
 	if err == sql.ErrNoRows {
 		return nil, domain.ErrAlarmNotFound
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
+	tt, err := domain.NewAlarmTriggerType(triggerTypeStr)
+	if err != nil {
+		return nil, err
+	}
+
+	event.TriggerType = tt
 	event.Status = domain.AlarmStatus(status)
 	return event, nil
 }
@@ -76,13 +87,21 @@ func (r *PostgresAlarmRepository) FindRecent(limit int) ([]*domain.AlarmEvent, e
 	var events []*domain.AlarmEvent
 	for rows.Next() {
 		event := &domain.AlarmEvent{}
-		var status string
+		var triggerTypeStr, status string
+
 		if err := rows.Scan(
-			&event.ID, &event.TriggerType, &event.SensorID, &event.Location,
+			&event.ID, &triggerTypeStr, &event.SensorID, &event.Location,
 			&status, &event.TriggeredAt, &event.SilencedAt,
 		); err != nil {
 			return nil, err
 		}
+
+		tt, err := domain.NewAlarmTriggerType(triggerTypeStr)
+		if err != nil {
+			return nil, err
+		}
+
+		event.TriggerType = tt
 		event.Status = domain.AlarmStatus(status)
 		events = append(events, event)
 	}

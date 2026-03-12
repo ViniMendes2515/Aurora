@@ -67,7 +67,7 @@ func (p *NATSPublisher) PublishLightEvent(event *domain.LightLevelEvent) error {
 	}
 
 	log.Printf("Published light event to %s: sensorID=%s, value=%.1f%%",
-		topic, event.SensorID, event.Value)
+		topic, event.SensorID, event.Value.Float64())
 
 	// Envia atualização em tempo real para WebSocket (histórico de luminosidade)
 	if p.hub != nil {
@@ -75,7 +75,7 @@ func (p *NATSPublisher) PublishLightEvent(event *domain.LightLevelEvent) error {
 			Type:       ws.EventLightUpdated,
 			SensorID:   event.SensorID,
 			SensorType: string(domain.SensorTypeLight),
-			Value:      event.Value,
+			Value:      event.Value.Float64(),
 			Raw:        event.Raw,
 			RecordedAt: event.RecordedAt.Format(time.RFC3339),
 		})

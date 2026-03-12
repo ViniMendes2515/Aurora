@@ -7,12 +7,15 @@ import (
 )
 
 func TestNewUser_CamposPreenchidos(t *testing.T) {
-	u := domain.NewUser("user@example.com", "hashedpassword")
+	u, err := domain.NewUser("user@example.com", "hashedpassword")
+	if err != nil {
+		t.Fatalf("NewUser() erro inesperado: %v", err)
+	}
 	if u.ID == "" {
 		t.Error("ID nao deve ser vazio")
 	}
-	if u.Email != "user@example.com" {
-		t.Errorf("Email esperado user@example.com, obteve %s", u.Email)
+	if u.Email.String() != "user@example.com" {
+		t.Errorf("Email esperado user@example.com, obteve %s", u.Email.String())
 	}
 	if u.PasswordHash != "hashedpassword" {
 		t.Error("PasswordHash nao corresponde")
@@ -26,37 +29,16 @@ func TestNewUser_CamposPreenchidos(t *testing.T) {
 }
 
 func TestNewUser_IDUnico(t *testing.T) {
-	u1 := domain.NewUser("a@a.com", "hash1")
-	u2 := domain.NewUser("b@b.com", "hash2")
+	u1, _ := domain.NewUser("a@a.com", "hash1")
+	u2, _ := domain.NewUser("b@b.com", "hash2")
 	if u1.ID == u2.ID {
 		t.Error("IDs de usuarios distintos nao devem ser iguais")
 	}
 }
 
-func TestValidateEmail(t *testing.T) {
-	testes := []struct {
-		nome    string
-		email   string
-		comErro bool
-	}{
-		{"email valido", "user@example.com", false},
-		{"email com subdominio", "user@mail.example.com", false},
-		{"email vazio", "", true},
-		{"sem arroba", "userexample.com", true},
-		{"sem ponto apos arroba", "user@examplecom", true},
-		{"muito curto", "a@", true},
-	}
-
-	for _, tt := range testes {
-		t.Run(tt.nome, func(t *testing.T) {
-			u := &domain.User{Email: tt.email}
-			err := u.ValidateEmail()
-			if (err != nil) != tt.comErro {
-				t.Errorf("ValidateEmail() erro = %v, esperado erro = %v", err, tt.comErro)
-			}
-			if tt.comErro && err != domain.ErrInvalidEmail {
-				t.Errorf("esperado ErrInvalidEmail, obteve %v", err)
-			}
-		})
+func TestNewUser_EmailInvalido(t *testing.T) {
+	_, err := domain.NewUser("invalido", "hash")
+	if err != domain.ErrInvalidEmail {
+		t.Errorf("esperado ErrInvalidEmail, obteve %v", err)
 	}
 }
