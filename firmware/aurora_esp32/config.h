@@ -5,10 +5,9 @@
 
 // ============================================================
 // Endereço IP do computador onde os serviços estão rodando
-// Execute "ip route get 1" ou "hostname -I" para descobrir
 // ============================================================
-#define SENSORS_SERVICE_URL   "http://192.168.0.160:8081"
-#define LIGHTING_SERVICE_URL  "http://192.168.0.160:8082"
+#define SENSORS_SERVICE_URL   "http://192.168.0.160/api/sensors"
+#define LIGHTING_SERVICE_URL  "http://192.168.0.160/api/lighting"
 
 #define DEVICE_API_KEY  "aurora-device-key-2024"
 

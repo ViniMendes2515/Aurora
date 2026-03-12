@@ -40,3 +40,5 @@ docker-compose.override.yml
 node_modules/
 dist/
 .angular/
+
+CLAUDE.md

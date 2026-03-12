@@ -4,5 +4,6 @@ export const environment = {
   sensorsApiUrl: '/api/sensors',
   lightingApiUrl: '/api/lighting',
   securityApiUrl: '/api/security',
-  rulesApiUrl: '/api/rules'
+  rulesApiUrl: '/api/rules',
+  notificationsApiUrl: '/api/notifications'
 };

@@ -75,7 +75,7 @@ export class SensorsSocketService implements OnDestroy {
   }
 
   private buildWsUrl(): string {
-    const httpBase = environment.sensorsApiUrl; // "/api/sensors"
+    const httpBase = environment.sensorsApiUrl;
     const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
     return `${proto}//${host}${httpBase}/ws`;
