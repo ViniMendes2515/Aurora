@@ -1,7 +1,14 @@
-<button 
+<button
   [type]="type"
-  class="aurora-btn"
-  [ngClass]="['btn-' + variant, 'btn-' + size]"
+  class="inline-flex items-center justify-center gap-2 font-sans font-bold tracking-[0.1em] uppercase rounded-lg transition-all duration-[250ms] cursor-pointer border disabled:opacity-35 disabled:cursor-not-allowed"
+  [ngClass]="{
+    'bg-aurora-primary border-aurora-primary/50 text-white hover:bg-[#12a5a5] hover:border-aurora-primary btn-primary': variant === 'primary',
+    'bg-aurora-primary/10 border-aurora-primary/[0.22] text-aurora-primary hover:bg-aurora-primary/[0.18] hover:border-aurora-primary/40': variant === 'secondary',
+    'bg-transparent border-aurora-primary/30 text-aurora-primary hover:bg-aurora-primary/10 hover:border-aurora-primary/50': variant === 'outline',
+    'py-1.5 px-3 text-[0.65rem]': size === 'sm',
+    'py-2 px-4 text-[0.7rem]': size === 'md',
+    'py-2.5 px-5 text-[0.75rem]': size === 'lg'
+  }"
   [disabled]="disabled || loading"
   (click)="onClick()">
   <i *ngIf="loading" class="pi pi-spinner pi-spin"></i>

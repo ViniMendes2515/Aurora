@@ -1,14 +1,16 @@
-<nav class="navbar">
-  <div class="navbar-left">
-    <button class="toggle-btn" (click)="onToggleSidebar()">
-      <i class="pi pi-bars"></i>
+<nav class="fixed top-0 right-0 left-0 h-[4.5rem] bg-aurora-light/95 backdrop-blur-xl border-b border-aurora-border flex items-center justify-between px-6 max-md:px-4 z-40 transition-[left] duration-300">
+  <div class="flex items-center gap-4">
+    <button
+      class="flex items-center justify-center w-8 h-8 rounded-[6px] bg-transparent border-none cursor-pointer transition-all duration-200 text-aurora-text-muted hover:bg-aurora-primary/10 hover:text-aurora-text"
+      (click)="onToggleSidebar()">
+      <i class="pi pi-bars text-base"></i>
     </button>
   </div>
-  
-  <div class="navbar-right">
-    <div class="user-info">
-      <i class="pi pi-user user-icon"></i>
-      <span class="user-email">{{ userEmail }}</span>
+
+  <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2.5 py-1.5 px-3.5 bg-aurora-border/60 border border-aurora-border rounded-full transition-all duration-200 hover:bg-aurora-primary/[0.08] hover:border-aurora-primary/20">
+      <i class="pi pi-user text-[0.875rem] text-aurora-primary"></i>
+      <span class="font-sans text-[0.75rem] font-medium text-aurora-text tracking-[0.03em] max-md:hidden">{{ userEmail }}</span>
     </div>
   </div>
 </nav>

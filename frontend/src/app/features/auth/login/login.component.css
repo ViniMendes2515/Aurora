@@ -1,104 +1,74 @@
-.login-container {
-  @apply min-h-screen bg-aurora-light flex items-center justify-center p-4;
+/* Atmospheric background effects */
+.login-container::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 60%;
+  background: radial-gradient(ellipse, rgba(15,140,140,0.12) 0%, transparent 70%);
+  pointer-events: none;
 }
 
-.login-wrapper {
-  @apply w-full max-w-md;
+.login-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(0deg, rgba(1,18,38,0.6) 0%, transparent 100%);
+  pointer-events: none;
 }
 
+/* PrimeNG overrides */
 :host ::ng-deep .login-card {
-  @apply rounded-2xl shadow-2xl;
+  background: rgba(10,37,53,0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(13,51,72,0.9) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(15,140,140,0.05) inset !important;
 }
 
 :host ::ng-deep .login-card .p-card-body {
-  @apply p-8;
-}
-
-.login-header {
-  @apply text-center mb-8;
-}
-
-.logo {
-  @apply rounded-2xl flex items-center justify-center mx-auto;
-  width: 10rem;
-}
-
-.logo i {
-  @apply text-white text-3xl;
-}
-
-.title {
-  @apply text-3xl font-bold text-aurora-primary mb-2;
-}
-
-.subtitle {
-  @apply text-aurora-dark/70;
-}
-
-.error-alert {
-  @apply flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6;
-}
-
-.error-alert i.pi-exclamation-circle {
-  @apply text-red-500 text-lg flex-shrink-0;
-}
-
-.error-alert span {
-  @apply flex-1 text-sm font-medium;
-}
-
-.error-alert .close-btn {
-  @apply bg-transparent border-none cursor-pointer p-1 rounded-lg hover:bg-red-100 transition-colors;
-}
-
-.error-alert .close-btn i {
-  @apply text-red-400 text-sm;
-}
-
-.login-form {
-  @apply space-y-5;
-}
-
-.form-group {
-  @apply flex flex-col gap-2;
-}
-
-.form-group label {
-  @apply text-aurora-dark font-medium text-sm;
-}
-
-.form-group input {
-  @apply w-full;
+  padding: 2.5rem !important;
 }
 
 :host ::ng-deep .p-inputtext {
-  @apply rounded-xl py-3 px-4;
+  background: rgba(1,28,38,0.9) !important;
+  border: 1px solid #0d3348 !important;
+  border-radius: 10px !important;
+  color: #a8c5d8 !important;
+  font-family: 'Josefin Sans', sans-serif !important;
+  font-size: 0.875rem !important;
+  padding: 0.75rem 1rem !important;
+  transition: all 0.2s ease !important;
+}
+
+:host ::ng-deep .p-inputtext:focus {
+  border-color: #0F8C8C !important;
+  box-shadow: 0 0 0 3px rgba(15,140,140,0.15) !important;
+}
+
+:host ::ng-deep .p-inputtext::placeholder {
+  color: #2d5268 !important;
 }
 
 :host ::ng-deep .p-password {
-  @apply w-full;
+  width: 100% !important;
 }
 
 :host ::ng-deep .p-password input {
-  @apply rounded-xl py-3 px-4 w-full;
+  width: 100% !important;
 }
 
-.error-text {
-  @apply text-red-500 text-xs;
+:host ::ng-deep .p-password-toggle-icon {
+  color: #5a8099 !important;
 }
 
-.submit-btn {
-  @apply bg-aurora-primary border-aurora-primary rounded-xl py-3 mt-4 font-semibold;
-}
-
-.submit-btn:hover {
-  @apply bg-aurora-secondary border-aurora-secondary;
-}
-
-.login-footer {
-  @apply text-center mt-6 text-aurora-dark/70;
-}
-
-.link {
-  @apply text-aurora-primary hover:text-aurora-secondary font-semibold no-underline;
+:host ::ng-deep .submit-btn:hover {
+  background: #12a5a5 !important;
+  border-color: #12a5a5 !important;
+  box-shadow: 0 0 20px rgba(15,140,140,0.4) !important;
 }

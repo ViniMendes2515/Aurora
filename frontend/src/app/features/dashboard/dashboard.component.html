@@ -1,30 +1,29 @@
-<div class="dashboard-layout">
+<div class="min-h-screen bg-gradient-to-b from-aurora-light to-aurora-base">
   <!-- Overlay para mobile -->
-  <div 
-    class="sidebar-overlay" 
+  <div
+    class="sidebar-overlay fixed inset-0 bg-black/60 z-40 opacity-0 pointer-events-none hidden md:hidden transition-opacity duration-300"
     [class.visible]="isSidebarOpen && !isSidebarCollapsed"
     (click)="closeSidebar()">
   </div>
 
-  <app-sidebar 
+  <app-sidebar
     [isOpen]="isSidebarOpen"
     [isCollapsed]="isSidebarCollapsed"
     (logout)="onLogout()"
     (menuClick)="closeSidebar()">
   </app-sidebar>
 
-  <div class="dashboard-main" 
-       [class.sidebar-expanded]="isSidebarOpen && !isSidebarCollapsed"
+  <div class="dashboard-main min-h-screen"
        [class.sidebar-collapsed]="isSidebarOpen && isSidebarCollapsed"
        [class.sidebar-hidden]="!isSidebarOpen">
-    <app-navbar 
-      [userEmail]="userEmail" 
+    <app-navbar
+      [userEmail]="userEmail"
       [isSidebarOpen]="isSidebarOpen"
       [isSidebarCollapsed]="isSidebarCollapsed"
       (toggleSidebar)="toggleSidebar()">
     </app-navbar>
 
-    <main class="dashboard-content">
+    <main class="pt-[5.5rem] px-6 pb-6">
       <router-outlet></router-outlet>
     </main>
   </div>

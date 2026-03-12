@@ -1,65 +1,68 @@
-<div class="login-container">
-  <div class="login-wrapper">
+<div class="login-container relative min-h-screen bg-aurora-gradient flex items-center justify-center p-6 overflow-hidden">
+  <div class="relative z-10 w-full max-w-[26rem]">
     <p-card styleClass="login-card">
-      <div class="login-header">
-        <div class="logo">
-            <img src="assets/favicon/android-chrome-512x512.png" alt="logo AURORA">
+      <div class="text-center mb-8">
+        <div class="flex items-center justify-center mx-auto mb-4 w-32">
+          <img src="assets/logo-aurora.png" alt="logo AURORA" class="w-full h-full object-contain brightness-[10] saturate-0">
         </div>
-        <h1 class="title">Aurora Home System</h1>
-        <p class="subtitle">Faça login para continuar</p>
+        <h1 class="font-display text-[1.75rem] text-aurora-text tracking-[0.05em] mb-1.5">Aurora</h1>
+        <p class="font-sans text-[0.75rem] font-normal tracking-[0.12em] uppercase text-aurora-text-muted">Acesse seu ambiente inteligente</p>
       </div>
 
-      <div *ngIf="errorMessage" class="error-alert">
+      <div *ngIf="errorMessage"
+           class="flex items-center gap-3 bg-red-500/[0.08] border border-red-500/25 text-red-400 px-4 py-3 rounded-[10px] mb-6 text-[0.8125rem]">
         <i class="pi pi-exclamation-circle"></i>
         <span>{{ errorMessage }}</span>
-        <button type="button" class="close-btn" (click)="errorMessage = ''">
+        <button type="button"
+                class="ml-auto bg-transparent border-none cursor-pointer p-1 text-red-400/60 rounded hover:text-red-400 transition-colors"
+                (click)="errorMessage = ''">
           <i class="pi pi-times"></i>
         </button>
       </div>
 
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-        <div class="form-group">
-          <label for="email">E-mail</label>
-          <input 
-            pInputText 
-            id="email" 
-            formControlName="email" 
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+        <div class="flex flex-col gap-2">
+          <label for="email" class="font-sans text-[0.6875rem] font-semibold tracking-[0.1em] uppercase text-aurora-text-muted">E-mail</label>
+          <input
+            pInputText
+            id="email"
+            formControlName="email"
             placeholder="seu@email.com"
             class="w-full"
             [ngClass]="{'ng-invalid ng-dirty': email?.invalid && email?.touched}" />
-          <small *ngIf="email?.invalid && email?.touched" class="error-text">
+          <small *ngIf="email?.invalid && email?.touched" class="text-[0.6875rem] text-red-400 tracking-[0.03em]">
             E-mail inválido
           </small>
         </div>
 
-        <div class="form-group">
-          <label for="password">Senha</label>
-          <p-password 
-            id="password" 
-            formControlName="password" 
+        <div class="flex flex-col gap-2">
+          <label for="password" class="font-sans text-[0.6875rem] font-semibold tracking-[0.1em] uppercase text-aurora-text-muted">Senha</label>
+          <p-password
+            id="password"
+            formControlName="password"
             placeholder="Sua senha"
             [toggleMask]="true"
             [feedback]="false"
             styleClass="w-full"
             inputStyleClass="w-full">
           </p-password>
-          <small *ngIf="password?.invalid && password?.touched" class="error-text">
+          <small *ngIf="password?.invalid && password?.touched" class="text-[0.6875rem] text-red-400 tracking-[0.03em]">
             Senha deve ter no mínimo 6 caracteres
           </small>
         </div>
 
-        <button 
-          pButton 
-          type="submit" 
-          label="Entrar" 
+        <button
+          pButton
+          type="submit"
+          label="Entrar"
           [loading]="loading"
-          class="submit-btn w-full">
+          class="submit-btn w-full !bg-aurora-primary !border-aurora-primary !rounded-[10px] !py-3 mt-2 !font-sans !text-[0.75rem] !font-bold !tracking-[0.12em] !uppercase !transition-all">
         </button>
       </form>
 
-      <div class="login-footer">
-        <p>Não tem uma conta? 
-          <a routerLink="/register" class="link">Criar conta</a>
+      <div class="text-center mt-6 font-sans text-[0.75rem] text-aurora-text-muted tracking-[0.05em]">
+        <p>Não tem uma conta?
+          <a routerLink="/register" class="text-aurora-primary font-semibold no-underline hover:text-[#12a5a5] transition-colors">Criar conta</a>
         </p>
       </div>
     </p-card>

@@ -1,97 +1,46 @@
-.sidebar {
-  @apply fixed left-0 top-0 h-screen w-64 bg-aurora-dark flex flex-col z-50;
-  transition: transform 0.3s ease, width 0.3s ease;
-}
-
-.sidebar-collapsed {
-  @apply w-20;
-}
-
+/* Hidden state (mobile) */
 .sidebar-hidden {
   transform: translateX(-100%);
 }
 
-.sidebar-header {
-  @apply h-16 flex items-center justify-center border-b border-aurora-base/20;
+/* Needed for ::before positioning */
+.sidebar {
+  position: fixed;
 }
 
-.logo-container {
-  @apply flex items-center gap-3;
+/* Top glow atmospheric effect */
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: radial-gradient(ellipse at top center, rgba(15,140,140,0.12) 0%, transparent 70%);
+  pointer-events: none;
 }
 
-.logo {
-  @apply h-10 rounded-xl flex items-center justify-center;
-  margin-right: -1rem;
-  width: 5rem;
-}
-
-.logo-icon {
-  @apply text-white text-xl;
-}
-
-.logo-text {
-  @apply text-white font-bold text-xl;
-}
-
-.sidebar-nav {
-  @apply flex-1 py-6 overflow-y-auto;
-}
-
-.menu-list {
-  @apply list-none p-0 m-0;
-}
-
-.menu-item {
-  @apply px-4 mb-2;
-}
-
-.menu-link {
-  @apply flex items-center gap-4 px-4 py-3 rounded-xl text-aurora-light hover:bg-aurora-primary/20 hover:text-white transition-all duration-300 no-underline;
-}
-
+/* Active menu item style */
 .menu-link.active {
-  @apply bg-aurora-primary text-white;
+  color: #0F8C8C !important;
+  background: rgba(15,140,140,0.12) !important;
+  border: 1px solid rgba(15,140,140,0.2) !important;
 }
 
-.menu-icon {
-  @apply text-lg w-6 text-center;
+/* Active menu item left indicator bar */
+.menu-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: #0F8C8C;
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 8px rgba(15,140,140,0.6);
 }
 
-.menu-label {
-  @apply font-medium;
-}
-
-.sidebar-footer {
-  @apply p-4 border-t border-aurora-base/20;
-}
-
-.logout-btn {
-  @apply w-full flex items-center gap-4 px-4 py-3 rounded-xl text-aurora-light hover:bg-aurora-secondary hover:text-white transition-all duration-300 bg-transparent border-none cursor-pointer;
-}
-
-/* Collapsed state - only icons */
-.sidebar-collapsed .menu-link,
-.sidebar-collapsed .logout-btn {
-  @apply justify-center;
-}
-
-.sidebar-collapsed .menu-item {
-  @apply px-2;
-}
-
-.sidebar-collapsed .menu-link {
-  @apply px-0 justify-center;
-}
-
-.sidebar-collapsed .logout-btn {
-  @apply px-0 justify-center;
-}
-
-.sidebar-collapsed .menu-label,
-.sidebar-collapsed .logo-text {
-  @apply hidden;
-}
-
-.sidebar-collapsed .logo-container {
-  @apply justify-center;
+.sidebar-collapsed .menu-link.active::before {
+  display: none;
 }

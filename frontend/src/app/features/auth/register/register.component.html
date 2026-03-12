@@ -1,75 +1,75 @@
-<div class="register-container">
-  <div class="register-wrapper">
+<div class="register-container relative min-h-screen bg-aurora-gradient flex items-center justify-center p-6 overflow-hidden">
+  <div class="relative z-10 w-full max-w-[26rem]">
     <p-card styleClass="register-card">
-      <div class="register-header">
-        <div class="logo">
-          <i class="pi pi-sun"></i>
+      <div class="text-center mb-8">
+        <div class="flex items-center justify-center mx-auto mb-4 w-32 h-16">
+          <img src="assets/logo-aurora.png" alt="logo AURORA" class="w-full h-full object-contain brightness-[10] saturate-0">
         </div>
-        <h1 class="title">Aurora Home System</h1>
-        <p class="subtitle">Crie sua conta</p>
+        <h1 class="font-display text-[1.75rem] text-aurora-text tracking-[0.05em] mb-1.5">Aurora</h1>
+        <p class="font-sans text-[0.75rem] font-normal tracking-[0.12em] uppercase text-aurora-text-muted">Crie sua conta</p>
       </div>
 
       <p-messages [value]="messages" [closable]="true"></p-messages>
 
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
-        <div class="form-group">
-          <label for="email">E-mail</label>
-          <input 
-            pInputText 
-            id="email" 
-            formControlName="email" 
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+        <div class="flex flex-col gap-2">
+          <label for="email" class="font-sans text-[0.6875rem] font-semibold tracking-[0.1em] uppercase text-aurora-text-muted">E-mail</label>
+          <input
+            pInputText
+            id="email"
+            formControlName="email"
             placeholder="seu@email.com"
             class="w-full"
             [ngClass]="{'ng-invalid ng-dirty': email?.invalid && email?.touched}" />
-          <small *ngIf="email?.invalid && email?.touched" class="error-text">
+          <small *ngIf="email?.invalid && email?.touched" class="text-[0.6875rem] text-red-400 tracking-[0.03em]">
             E-mail inválido
           </small>
         </div>
 
-        <div class="form-group">
-          <label for="password">Senha</label>
-          <p-password 
-            id="password" 
-            formControlName="password" 
+        <div class="flex flex-col gap-2">
+          <label for="password" class="font-sans text-[0.6875rem] font-semibold tracking-[0.1em] uppercase text-aurora-text-muted">Senha</label>
+          <p-password
+            id="password"
+            formControlName="password"
             placeholder="Sua senha"
             [toggleMask]="true"
             [feedback]="true"
             styleClass="w-full"
             inputStyleClass="w-full">
           </p-password>
-          <small *ngIf="password?.invalid && password?.touched" class="error-text">
+          <small *ngIf="password?.invalid && password?.touched" class="text-[0.6875rem] text-red-400 tracking-[0.03em]">
             Senha deve ter no mínimo 6 caracteres
           </small>
         </div>
 
-        <div class="form-group">
-          <label for="confirmPassword">Confirmar Senha</label>
-          <p-password 
-            id="confirmPassword" 
-            formControlName="confirmPassword" 
+        <div class="flex flex-col gap-2">
+          <label for="confirmPassword" class="font-sans text-[0.6875rem] font-semibold tracking-[0.1em] uppercase text-aurora-text-muted">Confirmar Senha</label>
+          <p-password
+            id="confirmPassword"
+            formControlName="confirmPassword"
             placeholder="Confirme sua senha"
             [toggleMask]="true"
             [feedback]="false"
             styleClass="w-full"
             inputStyleClass="w-full">
           </p-password>
-          <small *ngIf="confirmPassword?.errors?.['passwordMismatch'] && confirmPassword?.touched" class="error-text">
+          <small *ngIf="confirmPassword?.errors?.['passwordMismatch'] && confirmPassword?.touched" class="text-[0.6875rem] text-red-400 tracking-[0.03em]">
             As senhas não coincidem
           </small>
         </div>
 
-        <button 
-          pButton 
-          type="submit" 
-          label="Criar Conta" 
+        <button
+          pButton
+          type="submit"
+          label="Criar Conta"
           [loading]="loading"
-          class="submit-btn w-full">
+          class="submit-btn w-full !bg-aurora-primary !border-aurora-primary !rounded-[10px] !py-3 mt-2 !font-sans !text-[0.75rem] !font-bold !tracking-[0.12em] !uppercase !transition-all">
         </button>
       </form>
 
-      <div class="register-footer">
-        <p>Já tem uma conta? 
-          <a routerLink="/login" class="link">Fazer login</a>
+      <div class="text-center mt-6 font-sans text-[0.75rem] text-aurora-text-muted tracking-[0.05em]">
+        <p>Já tem uma conta?
+          <a routerLink="/login" class="text-aurora-primary font-semibold no-underline hover:text-[#12a5a5] transition-colors">Fazer login</a>
         </p>
       </div>
     </p-card>

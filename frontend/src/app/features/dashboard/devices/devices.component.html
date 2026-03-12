@@ -1,34 +1,40 @@
 <div class="space-y-6">
-  <div class="flex items-center justify-between">
+  <!-- Header -->
+  <div class="flex items-start justify-between flex-wrap gap-4">
     <div>
-      <h1 class="text-3xl font-bold text-aurora-dark">Dispositivos</h1>
-      <p class="text-aurora-dark/60 mt-1">Controle suas luzes e atuadores</p>
+      <h1 style="font-family:'Yeseva One',serif; font-size:2rem; color:#a8c5d8; letter-spacing:0.03em;">Dispositivos</h1>
+      <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#5a8099; margin-top:0.25rem;">Controle suas luzes e atuadores</p>
     </div>
-    <div class="flex items-center gap-3">
-      <!-- Indicador de conexão WS -->
-      <span class="flex items-center gap-1.5 text-xs font-medium"
-            [class]="wsConnected ? 'text-green-600' : 'text-gray-400'">
-        <span class="w-2 h-2 rounded-full"
-              [class]="wsConnected ? 'bg-green-400 animate-pulse' : 'bg-gray-300'"></span>
+    <div class="flex items-center gap-3 flex-wrap">
+      <!-- WS indicator -->
+      <span class="flex items-center gap-1.5"
+            style="font-family:'Josefin Sans',sans-serif; font-size:0.65rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase;"
+            [style.color]="wsConnected ? '#0F8C8C' : '#3d6477'">
+        <span class="w-1.5 h-1.5 rounded-full"
+              [style.background]="wsConnected ? '#0F8C8C' : '#1e4257'"
+              [style.boxShadow]="wsConnected ? '0 0 6px rgba(15,140,140,0.6)' : 'none'"
+              [class.animate-pulse]="wsConnected"></span>
         {{ wsConnected ? 'Tempo real' : 'Desconectado' }}
       </span>
-      <!-- Controles globais -->
+
+      <div style="width:1px; height:1.5rem; background:#0d3348;"></div>
+
+      <!-- Bulk controls -->
       <div class="flex items-center gap-2">
-        <button
-          (click)="turnAllOn()"
-          [disabled]="loading || bulkLoading || lights.length === 0"
-          class="px-3 py-2 rounded-lg text-xs font-medium bg-yellow-400 text-white hover:bg-yellow-500
-                 disabled:opacity-40 disabled:cursor-not-allowed flex items-center">
-          <i class="pi pi-sun mr-1"></i>Ligar todas
+        <button (click)="turnAllOn()"
+                [disabled]="loading || bulkLoading || lights.length === 0"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                style="font-family:'Josefin Sans',sans-serif; font-size:0.675rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:rgba(251,191,36,0.1); color:#fbbf24; border:1px solid rgba(251,191,36,0.25);">
+          <i class="pi pi-sun"></i>Ligar todas
         </button>
-        <button
-          (click)="turnAllOff()"
-          [disabled]="loading || bulkLoading || lights.length === 0"
-          class="px-3 py-2 rounded-lg text-xs font-medium bg-gray-200 text-gray-700 hover:bg-gray-300
-                 disabled:opacity-40 disabled:cursor-not-allowed flex items-center">
-          <i class="pi pi-moon mr-1"></i>Desligar todas
+        <button (click)="turnAllOff()"
+                [disabled]="loading || bulkLoading || lights.length === 0"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                style="font-family:'Josefin Sans',sans-serif; font-size:0.675rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:rgba(1,28,38,0.6); color:#5a8099; border:1px solid #0d3348;">
+          <i class="pi pi-moon"></i>Desligar todas
         </button>
       </div>
+
       <button (click)="loadLights()" class="btn-primary">
         <i class="pi pi-refresh mr-2"></i>Atualizar
       </button>
@@ -37,68 +43,106 @@
 
   <!-- Loading -->
   <div *ngIf="loading" class="flex justify-center py-12">
-    <i class="pi pi-spin pi-spinner text-4xl text-aurora-primary"></i>
+    <i class="pi pi-spin pi-spinner text-3xl" style="color:#0F8C8C; opacity:0.7;"></i>
   </div>
 
-  <!-- Grid de luzes -->
+  <!-- Lights grid -->
   <div *ngIf="!loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
     <div *ngFor="let light of lights"
-         class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all"
-         [class.border-yellow-300]="light.state === 'on'"
-         [class.bg-yellow-50]="light.state === 'on'">
+         class="light-card rounded-xl p-5 transition-all duration-500 relative overflow-hidden"
+         [class.is-on]="light.state === 'on'"
+         [style.background]="light.state === 'on'
+           ? 'linear-gradient(135deg, rgba(30,20,5,0.97) 0%, rgba(18,14,4,0.97) 100%)'
+           : 'rgba(10,37,53,0.7)'"
+         [style.border]="light.state === 'on'
+           ? '1px solid rgba(251,191,36,0.3)'
+           : '1px solid #0d3348'">
 
-      <!-- Ícone e nome -->
-      <div class="flex items-center justify-between mb-4">
+      <!-- Halo de luz irradiando do topo quando ligada -->
+      <div *ngIf="light.state === 'on'"
+           class="absolute inset-0 pointer-events-none"
+           style="background: radial-gradient(ellipse 70% 40% at 50% -10%, rgba(251,191,36,0.12) 0%, transparent 70%);"></div>
+
+      <!-- Card header -->
+      <div class="flex items-center justify-between mb-4 relative">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-full flex items-center justify-center transition-colors"
-               [class]="light.state === 'on' ? 'bg-yellow-200' : 'bg-gray-100'">
-            <i class="pi pi-lightbulb text-2xl transition-colors"
-               [class]="light.state === 'on' ? 'text-yellow-500' : 'text-gray-400'"></i>
+          <!-- Ícone da lâmpada -->
+          <div class="bulb-icon w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-500"
+               [style.background]="light.state === 'on'
+                 ? 'radial-gradient(circle, rgba(251,191,36,0.25) 0%, rgba(251,191,36,0.08) 100%)'
+                 : 'rgba(1,28,38,0.6)'"
+               [style.border]="light.state === 'on'
+                 ? '1px solid rgba(251,191,36,0.4)'
+                 : '1px solid #0d3348'"
+               [style.boxShadow]="light.state === 'on'
+                 ? '0 0 20px rgba(251,191,36,0.25), inset 0 0 12px rgba(251,191,36,0.1)'
+                 : 'none'">
+            <i class="pi pi-lightbulb text-lg transition-all duration-500"
+               [class.bulb-on]="light.state === 'on'"
+               [style.color]="light.state === 'on' ? '#fbbf24' : '#3d6477'"
+               [style.fontSize]="light.state === 'on' ? '1.25rem' : '1.125rem'"></i>
           </div>
           <div>
-            <h3 class="font-semibold text-aurora-dark">{{ light.name }}</h3>
-            <p class="text-sm text-aurora-dark/60">{{ light.location }}</p>
+            <h3 style="font-family:'Josefin Sans',sans-serif; font-size:0.875rem; font-weight:600; letter-spacing:0.03em;"
+                [style.color]="light.state === 'on' ? '#fde68a' : '#a8c5d8'">{{ light.name }}</h3>
+            <p style="font-family:'Josefin Sans',sans-serif; font-size:0.675rem; text-transform:uppercase; letter-spacing:0.06em; margin-top:0.1rem;"
+               [style.color]="light.state === 'on' ? '#92762e' : '#5a8099'">{{ light.location }}</p>
           </div>
         </div>
-        <span class="w-3 h-3 rounded-full"
-              [class]="light.state === 'on' ? 'bg-green-400' : 'bg-gray-300'"></span>
+        <!-- Status dot -->
+        <span class="w-2 h-2 rounded-full transition-all duration-500"
+              [class.status-dot-on]="light.state === 'on'"
+              [style.background]="light.state === 'on' ? '#fbbf24' : '#1e4257'"></span>
       </div>
 
-      <!-- Status -->
-      <p class="text-center font-medium mb-4"
-         [class]="light.state === 'on' ? 'text-yellow-600' : 'text-gray-400'">
-        {{ light.state === 'on' ? 'Ligada' : 'Desligada' }}
-      </p>
+      <!-- Badge de status -->
+      <div class="relative text-center py-2 rounded-lg mb-4 overflow-hidden"
+           [style.background]="light.state === 'on'
+             ? 'linear-gradient(90deg, rgba(251,191,36,0.05) 0%, rgba(251,191,36,0.12) 50%, rgba(251,191,36,0.05) 100%)'
+             : 'rgba(1,28,38,0.3)'"
+           [style.border]="light.state === 'on'
+             ? '1px solid rgba(251,191,36,0.2)'
+             : '1px solid rgba(13,51,72,0.5)'">
+        <!-- shimmer quando ligada -->
+        <div *ngIf="light.state === 'on'"
+             class="absolute inset-0 pointer-events-none"
+             style="background: linear-gradient(90deg, transparent 0%, rgba(251,191,36,0.06) 50%, transparent 100%); animation: shimmer 2.5s ease-in-out infinite;">
+        </div>
+        <span style="font-family:'Josefin Sans',sans-serif; font-size:0.675rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; position:relative;"
+              [style.color]="light.state === 'on' ? '#fbbf24' : '#3d6477'">
+          {{ light.state === 'on' ? '● Ligada' : '○ Desligada' }}
+        </span>
+      </div>
 
-      <!-- Controles -->
-      <div class="flex gap-2">
+      <!-- Controls -->
+      <div class="flex gap-2 relative">
         <button (click)="turnOn(light)"
                 [disabled]="light.state === 'on' || loadingId === light.id"
-                class="flex-1 py-2 rounded-lg text-sm font-medium transition-colors
-                       bg-yellow-400 text-white hover:bg-yellow-500
-                       disabled:opacity-40 disabled:cursor-not-allowed">
-          <i class="pi pi-sun mr-1"></i>Ligar
+                class="btn-turn-on flex-1 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                style="font-family:'Josefin Sans',sans-serif; font-size:0.675rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:rgba(251,191,36,0.08); color:#d4a017; border:1px solid rgba(251,191,36,0.2);">
+          <i class="pi pi-sun text-sm"></i>Ligar
         </button>
         <button (click)="turnOff(light)"
                 [disabled]="light.state === 'off' || loadingId === light.id"
-                class="flex-1 py-2 rounded-lg text-sm font-medium transition-colors
-                       bg-gray-200 text-gray-700 hover:bg-gray-300
-                       disabled:opacity-40 disabled:cursor-not-allowed">
-          <i class="pi pi-moon mr-1"></i>Desligar
+                class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                style="font-family:'Josefin Sans',sans-serif; font-size:0.675rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:rgba(1,28,38,0.5); color:#5a8099; border:1px solid #0d3348;">
+          <i class="pi pi-moon text-sm"></i>Desligar
         </button>
       </div>
     </div>
 
-    <!-- Nenhum dispositivo -->
-    <div *ngIf="lights.length === 0" class="col-span-3 bg-white rounded-xl shadow-sm p-12 text-center">
-      <i class="pi pi-lightbulb text-5xl text-aurora-dark/20 mb-4"></i>
-      <h3 class="text-lg font-medium text-aurora-dark/60">Nenhum dispositivo encontrado</h3>
-      <p class="text-sm text-aurora-dark/40 mt-1">Os dispositivos aparecerão aqui quando o ESP32 estiver conectado</p>
+    <!-- Empty state -->
+    <div *ngIf="lights.length === 0" class="col-span-3 rounded-xl p-12 text-center"
+         style="background:rgba(10,37,53,0.5); border:1px dashed #0d3348;">
+      <i class="pi pi-lightbulb text-4xl block mb-4" style="color:#1e4257;"></i>
+      <h3 style="font-family:'Josefin Sans',sans-serif; font-size:0.8rem; font-weight:600; letter-spacing:0.08em; color:#3d6477; margin-bottom:0.375rem;">Nenhum dispositivo encontrado</h3>
+      <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#2a4e62; letter-spacing:0.04em;">Os dispositivos aparecerão aqui quando o ESP32 estiver conectado</p>
     </div>
   </div>
 
-  <!-- Feedback de erro -->
-  <div *ngIf="error" class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
-    <i class="pi pi-exclamation-triangle mr-2"></i>{{ error }}
+  <!-- Error -->
+  <div *ngIf="error" class="flex items-center gap-3 rounded-lg px-4 py-3"
+       style="background:rgba(239,68,68,0.07); border:1px solid rgba(239,68,68,0.2); color:#ef4444; font-family:'Josefin Sans',sans-serif; font-size:0.8rem;">
+    <i class="pi pi-exclamation-triangle"></i>{{ error }}
   </div>
 </div>

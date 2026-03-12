@@ -1,52 +1,33 @@
-.metric-card {
-  @apply rounded-xl shadow-lg p-6 flex items-center gap-4 transition-transform duration-300 hover:scale-105;
+/* Hover glow overlay via pseudo-element (not achievable with Tailwind alone) */
+.metric-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: inherit;
 }
 
-.card-primary {
-  @apply bg-aurora-primary;
+.metric-card:hover::before {
+  opacity: 1;
 }
 
-.card-secondary {
-  @apply bg-aurora-secondary;
+.metric-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 
-.card-base {
-  @apply bg-aurora-base;
+.card-primary::before {
+  background: radial-gradient(ellipse at top left, rgba(15,140,140,0.08) 0%, transparent 70%);
 }
 
-.card-dark {
-  @apply bg-aurora-dark;
+.card-secondary::before {
+  background: radial-gradient(ellipse at top left, rgba(2,89,89,0.12) 0%, transparent 70%);
 }
 
-.card-icon {
-  @apply w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center;
+.card-base::before {
+  background: radial-gradient(ellipse at top left, rgba(168,197,216,0.05) 0%, transparent 70%);
 }
 
-.card-icon i {
-  @apply text-white text-2xl;
-}
-
-.card-content {
-  @apply flex flex-col;
-}
-
-.card-value {
-  @apply text-white text-3xl font-bold;
-}
-
-.card-title {
-  @apply text-white/80 text-sm font-medium;
-}
-
-.card-base .card-value,
-.card-base .card-title {
-  @apply text-aurora-dark;
-}
-
-.card-base .card-icon {
-  @apply bg-aurora-dark/20;
-}
-
-.card-base .card-icon i {
-  @apply text-aurora-dark;
+.card-dark::before {
+  background: radial-gradient(ellipse at top left, rgba(1,40,64,0.2) 0%, transparent 70%);
 }
