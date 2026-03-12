@@ -1,30 +1,61 @@
 # Aurora Home System
 
-Sistema de automação residencial baseado em microsserviços, DDD (Domain-Driven Design) e arquitetura em camadas (Layered Architecture).
+Sistema de automação residencial baseado em microsserviços, DDD (Domain-Driven Design) e arquitetura em camadas.
 
-## 🏗️ Arquitetura
+## Arquitetura
 
 O projeto segue uma arquitetura de microsserviços onde cada serviço respeita rigorosamente a separação em camadas:
 
 ```
 /domain         → Entidades, agregados, eventos, interfaces de repositório e contratos
 /application    → Casos de uso (services), orquestra lógica de negócio
-/infrastructure → Implementações concretas (HTTP, JWT, NATS, banco, repositórios)
+/infrastructure → Implementações concretas (HTTP/Gin, JWT, NATS, banco, repositórios, WebSocket)
 /cmd/api        → Inicialização do serviço
 ```
 
-### Serviços
+### Serviços e Portas
 
-| Serviço | Porta | Descrição |
-|---------|-------|-----------|
-| auth-service | 8080 | Autenticação e autorização (JWT) |
-| sensors-service | 8081 | Gerenciamento de sensores e detecção de movimento |
-| lighting-service | - | Controle de iluminação (em desenvolvimento) |
-| rules-service | - | Motor de regras (Rust - em desenvolvimento) |
-| security-service | - | Segurança residencial (Rust - em desenvolvimento) |
-| notifications-service | - | Notificações (em desenvolvimento) |
+| Serviço | Porta | Responsabilidade |
+|---|---|---|
+| auth-service | 8080 | Autenticação JWT, cadastro e login de usuários |
+| sensors-service | 8081 | Sensores de movimento/temperatura/umidade + WebSocket |
+| lighting-service | 8082 | Controle de iluminação + WebSocket |
+| security-service | 8083 | Sistema de alarme residencial |
+| rules-service | 8084 | Motor de regras de automação |
+| notifications-service | 8085 | Notificações de eventos do sistema |
+| **Nginx (API Gateway)** | **80** | Roteamento `/api/*` → serviços + serve o frontend Angular |
 
-## 🚀 Como Executar
+### Bounded Contexts
+
+Cada serviço representa um Bounded Context isolado com domínio próprio:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          Aurora Home System                             │
+│                                                                         │
+│  ┌──────────────┐   ┌──────────────────┐   ┌──────────────────────┐   │
+│  │ Auth Context │   │ Sensors Context  │   │  Lighting Context    │   │
+│  │              │   │                  │   │                      │   │
+│  │ - User       │   │ - Sensor         │   │ - Light              │   │
+│  │ - JWT tokens │   │ - MotionEvent    │   │ - LightState         │   │
+│  └──────────────┘   └────────┬─────────┘   └──────────┬───────────┘   │
+│                              │ NATS                    │ NATS          │
+│  ┌──────────────┐   ┌────────▼─────────┐   ┌──────────▼───────────┐   │
+│  │ Rules Context│   │Security Context  │   │Notifications Context │   │
+│  │              │   │                  │   │                      │   │
+│  │ - Rule       │◄──│ - Alarm          │   │ - Notification       │   │
+│  │ - Trigger    │   │ - AlarmEvent     │   │ - EventLog           │   │
+│  └──────────────┘   └──────────────────┘   └──────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Comunicação entre Serviços
+
+- **HTTP/REST**: Via Gin, roteado pelo Nginx API Gateway
+- **Assíncrono (NATS PubSub)**: Eventos de domínio publicados entre serviços (ex: `sensor.motion.detected` → rules-service e notifications-service)
+- **Real-time (WebSocket)**: Endpoints `/api/sensors/ws` e `/api/lighting/ws` para o frontend Angular
+
+## Como Executar
 
 ### Pré-requisitos
 
@@ -34,76 +65,35 @@ O projeto segue uma arquitetura de microsserviços onde cada serviço respeita r
 ### Subindo o Sistema
 
 ```bash
-cd aurora/infra
+cd infra
 docker compose up --build
 ```
 
-## 📡 API Endpoints
+O frontend Angular estará disponível em `http://localhost` (porta 80, servido pelo Nginx).
 
-### Auth Service (porta 8080)
+### Acessar serviços individualmente (desenvolvimento)
 
-#### Registrar Usuário
+Cada serviço pode ser acessado diretamente pela sua porta (8080–8085) ou via API Gateway na porta 80 com o prefixo `/api/<serviço>/`.
 
-```bash
-curl -X POST http://localhost:8080/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email": "usuario@exemplo.com", "password": "senha123"}'
-```
+## Tecnologias
 
-Resposta (201 Created):
-```json
-{
-  "id": "uuid-do-usuario",
-  "email": "usuario@exemplo.com"
-}
-```
+- **Go** — Linguagem de todos os microsserviços backend
+- **Gin** — Framework HTTP usado em todos os serviços
+- **Angular 18** — SPA frontend (standalone components, lazy loading)
+- **Tailwind CSS 3.4 + PrimeNG 17** — UI do frontend
+- **NATS** — Message broker para comunicação assíncrona entre serviços
+- **PostgreSQL** — Banco de dados relacional (cada serviço com seu schema)
+- **Nginx** — API Gateway e servidor do frontend em produção
+- **Docker / Docker Compose** — Containerização e orquestração local
+- **JWT HS256** — Autenticação stateless com expiração de 1 hora
 
-#### Login
-
-```bash
-curl -X POST http://localhost:8080/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email": "usuario@exemplo.com", "password": "senha123"}'
-```
-
-Resposta (200 OK):
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
-
-### Sensors Service (porta 8081)
-
-#### Registrar Movimento em Sensor
-
-```bash
-curl -X POST http://localhost:8081/sensors/sensor-001/motion \
-  -H "Authorization: Bearer <seu-token-jwt>"
-```
-
-Resposta (200 OK):
-```json
-{
-  "status": "motion registered"
-}
-```
-
-## 🔧 Tecnologias
-
-- **Go** - Linguagem principal dos microsserviços
-- **Rust** - Para serviços de alta performance (rules, security)
-- **NATS** - Message broker para comunicação entre serviços
-- **PostgreSQL** - Banco de dados relacional
-- **Docker** - Containerização
-- **JWT** - Autenticação stateless
-
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
-aurora/
+Aurora/
 ├── infra/
-│   └── docker-compose.yml
+│   ├── docker-compose.yml
+│   └── nginx/             # Configuração do API Gateway
 ├── services/
 │   ├── auth-service/
 │   ├── sensors-service/
@@ -111,18 +101,27 @@ aurora/
 │   ├── rules-service/
 │   ├── security-service/
 │   └── notifications-service/
-├── frontend/
-│   └── aurora-web/
-└── README.md
+├── pkg/
+│   ├── jwt/               # JWTValidator, JWTManager, AuthMiddleware compartilhados
+│   └── database/          # Conexão e health check do PostgreSQL
+├── frontend/              # Angular 18 SPA
+├── firmware/              # Código ESP32 (dispositivos IoT)
+└── docs/
 ```
 
-## 🔐 Segurança
+## Autenticação
+
+- **Usuários**: JWT HS256, header `Authorization: Bearer <token>`, expiração de 1 hora
+- **Dispositivos ESP32**: Header `X-Device-Key` com chave de API (bypass do JWT via `AuthMiddlewareWithDeviceKey`)
+- Senhas armazenadas com hash bcrypt
+
+## Segurança
 
 - Senhas armazenadas com hash bcrypt
 - Tokens JWT com expiração de 1 hora
 - Algoritmo HS256 para assinatura de tokens
-- Validação de propriedade de sensores por usuário
+- Validação de propriedade de recursos por usuário
 
-## 📋 Licença
+## Licença
 
 MIT License
