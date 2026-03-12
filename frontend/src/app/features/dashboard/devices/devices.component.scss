@@ -1,4 +1,58 @@
-.btn-primary {
-  @apply bg-aurora-primary text-white px-4 py-2 rounded-lg text-sm font-medium
-         hover:bg-aurora-primary/90 transition-colors flex items-center;
+
+// Bulb icon container: aquece quando ligada
+.bulb-icon {
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+// Card: irradiação de calor quando ligada
+.light-card {
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.5s ease;
+
+  &.is-on {
+    // O card inteiro emite uma leve aura quente
+    animation: card-warmth 3s ease-in-out infinite;
+  }
+}
+
+@keyframes card-warmth {
+  0%, 100% { box-shadow: 0 0 24px rgba(251, 191, 36, 0.12), 0 0 8px rgba(251, 191, 36, 0.06), inset 0 1px 0 rgba(251, 191, 36, 0.05); }
+  50%       { box-shadow: 0 0 36px rgba(251, 191, 36, 0.18), 0 0 16px rgba(251, 191, 36, 0.10), inset 0 1px 0 rgba(251, 191, 36, 0.08); }
+}
+
+// Bolinha de status pulsando quando ligada
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px rgba(251, 191, 36, 0.6), 0 0 10px rgba(251, 191, 36, 0.3); }
+  50%       { opacity: 0.7; box-shadow: 0 0 8px rgba(251, 191, 36, 0.9), 0 0 18px rgba(251, 191, 36, 0.5); }
+}
+.status-dot-on {
+  animation: status-pulse 2s ease-in-out infinite;
+}
+
+// WS indicator
+@keyframes ws-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px rgba(15,140,140,0.5); }
+  50%       { opacity: 0.5; box-shadow: 0 0 8px rgba(15,140,140,0.8); }
+}
+
+// Botão ligar: glow âmbar no hover
+.btn-turn-on:not(:disabled):hover {
+  background: rgba(251, 191, 36, 0.18) !important;
+  border-color: rgba(251, 191, 36, 0.5) !important;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.2);
+  color: #fbbf24 !important;
+}
+
+// Ícone da lâmpada — animação de aquecimento
+@keyframes bulb-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.6)); }
+  50%       { filter: drop-shadow(0 0 10px rgba(251, 191, 36, 1)); }
+}
+.bulb-on {
+  animation: bulb-glow 2.5s ease-in-out infinite;
+}
+
+// Shimmer no badge de status
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }

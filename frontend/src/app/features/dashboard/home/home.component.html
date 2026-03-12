@@ -1,13 +1,13 @@
-<div class="home-container">
-  <header class="home-header">
-    <h1 class="page-title">Dashboard</h1>
-    <p class="page-subtitle">{{ currentDate }}</p>
+<div class="flex flex-col gap-8">
+  <header class="mb-2">
+    <h1 class="font-display text-[2rem] max-md:text-[1.5rem] text-aurora-text tracking-[0.03em] mb-1">Dashboard</h1>
+    <p class="font-sans text-[0.7rem] font-medium tracking-[0.14em] uppercase text-aurora-text-muted">{{ currentDate }}</p>
   </header>
 
-  <section class="metrics-section">
-    <h2 class="section-title">Visão Geral</h2>
-    <div class="metrics-grid">
-      <app-card 
+  <section>
+    <h2 class="section-title font-sans text-[0.6875rem] font-bold tracking-[0.14em] uppercase text-aurora-primary mb-4 flex items-center gap-2">Visão Geral</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
+      <app-card
         *ngFor="let metric of metrics"
         [title]="metric.title"
         [value]="metric.value"
@@ -17,50 +17,64 @@
     </div>
   </section>
 
-  <section class="activity-section">
-    <h2 class="section-title">Atividade Recente</h2>
-    <div class="activity-card">
-      <div class="activity-list">
-        <div class="activity-item">
-          <div class="activity-icon primary">
-            <i class="pi pi-wifi"></i>
-          </div>
-          <div class="activity-content">
-            <p class="activity-text">Movimento detectado no Hall de Entrada</p>
-            <span class="activity-time">Há 5 minutos</span>
-          </div>
-        </div>
+  <section>
+    <h2 class="section-title font-sans text-[0.6875rem] font-bold tracking-[0.14em] uppercase text-aurora-primary mb-4 flex items-center gap-2">Atividade Recente</h2>
+    <div class="bg-aurora-surface/60 border border-aurora-border rounded-xl px-6 py-5">
 
-        <div class="activity-item">
-          <div class="activity-icon secondary">
-            <i class="pi pi-lightbulb"></i>
-          </div>
-          <div class="activity-content">
-            <p class="activity-text">Luz da sala ligada automaticamente</p>
-            <span class="activity-time">Há 15 minutos</span>
-          </div>
-        </div>
+      <!-- Loading -->
+      <div *ngIf="loadingActivities" class="flex flex-col items-center justify-center gap-2 py-10 text-[#3d6477] font-sans text-[0.75rem] tracking-[0.06em]">
+        <i class="pi pi-spin pi-spinner text-[1.5rem] text-[#1e4257] mb-1"></i>
+        <span>Carregando atividades...</span>
+      </div>
 
-        <div class="activity-item">
-          <div class="activity-icon dark">
-            <i class="pi pi-lock"></i>
-          </div>
-          <div class="activity-content">
-            <p class="activity-text">Porta da garagem trancada</p>
-            <span class="activity-time">Há 1 hora</span>
-          </div>
-        </div>
+      <!-- Empty -->
+      <div *ngIf="!loadingActivities && activities.length === 0" class="flex flex-col items-center justify-center gap-2 py-10 text-[#3d6477] font-sans text-[0.75rem] tracking-[0.06em] text-center">
+        <i class="pi pi-clock text-[1.5rem] text-[#1e4257] mb-1"></i>
+        <p class="text-aurora-text-muted font-semibold m-0">Nenhuma atividade registrada ainda.</p>
+        <span class="text-[0.7rem] text-[#2a4e62]">Os eventos aparecerão aqui em tempo real.</span>
+      </div>
 
-        <div class="activity-item">
-          <div class="activity-icon base">
-            <i class="pi pi-sun"></i>
+      <!-- Lista -->
+      <div *ngIf="!loadingActivities && activities.length > 0" class="flex flex-col gap-2">
+        <div *ngFor="let item of activities"
+             class="activity-item flex items-center gap-4 px-4 py-3 rounded-lg bg-aurora-light/40 border border-transparent transition-all duration-200 cursor-default hover:bg-aurora-primary/5 hover:border-aurora-primary/[0.12]"
+             [class.activity-item--new]="item.isNew">
+
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+               [ngClass]="{
+                 'bg-aurora-primary/[0.12] border border-aurora-primary/20':   item.iconVariant === 'primary',
+                 'bg-aurora-secondary/[0.15] border border-aurora-secondary/25': item.iconVariant === 'secondary',
+                 'bg-aurora-dark/40 border border-aurora-dark/60':              item.iconVariant === 'dark',
+                 'bg-aurora-text/[0.06] border border-aurora-text/10':          item.iconVariant === 'base',
+                 'bg-red-500/10 border border-red-500/25':                      item.iconVariant === 'alarm',
+                 'bg-amber-400/[0.12] border border-amber-400/30':              item.iconVariant === 'light-on',
+                 'bg-[#1e4257]/40 border border-aurora-border':                 item.iconVariant === 'light-off'
+               }">
+            <i class="pi text-[0.875rem]"
+               [class]="'pi ' + item.icon"
+               [ngClass]="{
+                 'text-aurora-primary':  item.iconVariant === 'primary',
+                 'text-[#12a5a5]':       item.iconVariant === 'secondary',
+                 'text-aurora-text-muted': item.iconVariant === 'dark',
+                 'text-aurora-text':     item.iconVariant === 'base',
+                 'text-red-400':         item.iconVariant === 'alarm',
+                 'text-amber-400':       item.iconVariant === 'light-on',
+                 'text-[#3d6477]':       item.iconVariant === 'light-off'
+               }"></i>
           </div>
-          <div class="activity-content">
-            <p class="activity-text">Modo economia ativado</p>
-            <span class="activity-time">Há 2 horas</span>
+
+          <div class="flex-1 min-w-0">
+            <p class="font-sans text-[0.8rem] font-medium text-aurora-text truncate tracking-[0.02em]">{{ item.text }}</p>
+            <span class="font-sans text-[0.675rem] text-aurora-text-muted tracking-[0.04em] mt-0.5 block">{{ formatTime(item.time) }}</span>
           </div>
+
+          <span *ngIf="item.isNew"
+                class="font-sans text-[0.55rem] font-bold tracking-[0.1em] uppercase text-aurora-primary bg-aurora-primary/10 border border-aurora-primary/25 rounded px-1.5 py-0.5 flex-shrink-0">
+            novo
+          </span>
         </div>
       </div>
+
     </div>
   </section>
 </div>

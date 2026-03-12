@@ -1,33 +1,4 @@
-.aurora-btn {
-  @apply inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-300 cursor-pointer border-2;
-}
-
-.aurora-btn:disabled {
-  @apply opacity-50 cursor-not-allowed;
-}
-
-/* Variants */
-.btn-primary {
-  @apply bg-aurora-primary border-aurora-primary text-white hover:bg-aurora-secondary hover:border-aurora-secondary;
-}
-
-.btn-secondary {
-  @apply bg-aurora-dark border-aurora-dark text-white hover:bg-aurora-secondary hover:border-aurora-secondary;
-}
-
-.btn-outline {
-  @apply bg-transparent border-aurora-primary text-aurora-primary hover:bg-aurora-primary hover:text-white;
-}
-
-/* Sizes */
-.btn-sm {
-  @apply px-3 py-1.5 text-sm;
-}
-
-.btn-md {
-  @apply px-4 py-2.5 text-base;
-}
-
-.btn-lg {
-  @apply px-6 py-3 text-lg;
+/* Variant hover states with box-shadow (not achievable with Tailwind alone) */
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 0 16px rgba(15,140,140,0.35);
 }

@@ -8,8 +8,7 @@ import { LightingService, Light } from '@core/services/lighting.service';
   selector: 'app-rules',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './rules.component.html',
-  styleUrls: ['./rules.component.scss']
+  templateUrl: './rules.component.html'
 })
 export class RulesComponent implements OnInit {
   rules: Rule[] = [];

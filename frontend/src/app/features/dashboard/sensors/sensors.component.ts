@@ -9,7 +9,6 @@ import { SensorsSocketService, SensorSocketEvent } from '@core/services/sensors-
   standalone: true,
   imports: [CommonModule],
   templateUrl: './sensors.component.html',
-  styleUrls: ['./sensors.component.scss']
 })
 export class SensorsComponent implements OnInit, OnDestroy {
   sensors: Sensor[] = [];
