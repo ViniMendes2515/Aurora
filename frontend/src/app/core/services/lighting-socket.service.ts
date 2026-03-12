@@ -17,12 +17,10 @@ export class LightingSocketService implements OnDestroy {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private destroyed = false;
 
-  /** Stream de eventos de mudança de estado das luzes */
   get stateChanges(): Observable<LightStateEvent> {
     return this.events$.asObservable();
   }
 
-  /** Indica se a conexão WS está aberta */
   get isConnected(): boolean {
     return this.ws?.readyState === WebSocket.OPEN;
   }
@@ -30,7 +28,6 @@ export class LightingSocketService implements OnDestroy {
   connect(): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) return;
 
-    // Deriva a URL WS a partir da URL HTTP do ambiente
     const wsUrl = this.buildWsUrl();
 
     this.ws = new WebSocket(wsUrl);
@@ -75,10 +72,9 @@ export class LightingSocketService implements OnDestroy {
   }
 
   private buildWsUrl(): string {
-    // Em dev, o proxy do Angular redireciona /api/lighting/ws → ws://localhost:8082/ws
-    const httpBase = environment.lightingApiUrl; // "/api/lighting"
+    const httpBase = environment.lightingApiUrl;
     const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host; // "localhost:4200"
+    const host = window.location.host;
     return `${proto}//${host}${httpBase}/ws`;
   }
 }

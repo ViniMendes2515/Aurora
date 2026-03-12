@@ -1,0 +1,8 @@
+export default {
+  '/api': {
+    target: 'http://localhost:80',
+    secure: false,
+    changeOrigin: true,
+    ws: true,
+  },
+};
