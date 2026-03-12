@@ -38,12 +38,15 @@ func TestNewMotionDetectedEvent_IDUnico(t *testing.T) {
 }
 
 func TestNewLightLevelEvent_CamposPreenchidos(t *testing.T) {
-	e := domain.NewLightLevelEvent("sensor1", 75.5, 3090)
+	e, err := domain.NewLightLevelEvent("sensor1", 75.5, 3090)
+	if err != nil {
+		t.Fatalf("NewLightLevelEvent() erro inesperado: %v", err)
+	}
 	if e.ID == "" {
 		t.Error("ID nao deve ser vazio")
 	}
-	if e.Value != 75.5 {
-		t.Errorf("Value esperado 75.5, obteve %v", e.Value)
+	if e.Value.Float64() != 75.5 {
+		t.Errorf("Value esperado 75.5, obteve %v", e.Value.Float64())
 	}
 	if e.Raw != 3090 {
 		t.Errorf("Raw esperado 3090, obteve %v", e.Raw)
@@ -54,7 +57,7 @@ func TestNewLightLevelEvent_CamposPreenchidos(t *testing.T) {
 }
 
 func TestLightLevelEvent_Topic(t *testing.T) {
-	e := domain.NewLightLevelEvent("s1", 50.0, 2048)
+	e, _ := domain.NewLightLevelEvent("s1", 50.0, 2048)
 	if got := e.Topic(); got != "sensors.light.changed" {
 		t.Errorf("Topic() esperado sensors.light.changed, obteve %s", got)
 	}
@@ -74,12 +77,15 @@ func TestNewMotionRecord_CamposPreenchidos(t *testing.T) {
 }
 
 func TestNewLightRecord_CamposPreenchidos(t *testing.T) {
-	r := domain.NewLightRecord("sensor1", 42.0, 1720)
+	r, err := domain.NewLightRecord("sensor1", 42.0, 1720)
+	if err != nil {
+		t.Fatalf("NewLightRecord() erro inesperado: %v", err)
+	}
 	if r.ID == "" {
 		t.Error("ID nao deve ser vazio")
 	}
-	if r.Value != 42.0 {
-		t.Errorf("Value esperado 42.0, obteve %v", r.Value)
+	if r.Value.Float64() != 42.0 {
+		t.Errorf("Value esperado 42.0, obteve %v", r.Value.Float64())
 	}
 	if r.Raw != 1720 {
 		t.Errorf("Raw esperado 1720, obteve %v", r.Raw)

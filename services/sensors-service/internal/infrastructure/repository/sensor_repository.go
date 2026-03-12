@@ -196,7 +196,7 @@ func (r *PostgresSensorRepository) SaveLightRecord(record *domain.LightRecord) e
 	_, err := r.db.Exec(query,
 		record.ID,
 		record.SensorID,
-		record.Value,
+		record.Value.Float64(),
 		record.Raw,
 		record.RecordedAt,
 	)
@@ -220,17 +220,23 @@ func (r *PostgresSensorRepository) GetLightRecords(sensorID string, limit int) (
 
 	var records []*domain.LightRecord
 	for rows.Next() {
+		var valueFloat float64
 		record := &domain.LightRecord{}
 		err := rows.Scan(
 			&record.ID,
 			&record.SensorID,
-			&record.Value,
+			&valueFloat,
 			&record.Raw,
 			&record.RecordedAt,
 		)
 		if err != nil {
 			return nil, err
 		}
+		pct, err := domain.NewLightPercentage(valueFloat)
+		if err != nil {
+			return nil, err
+		}
+		record.Value = pct
 		records = append(records, record)
 	}
 	return records, nil

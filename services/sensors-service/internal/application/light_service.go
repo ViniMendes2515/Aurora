@@ -43,12 +43,18 @@ func (s *LightService) RegisterLightLevel(req RegisterLightLevelRequest) (*Regis
 		return nil, domain.ErrSensorNotFound
 	}
 
-	record := domain.NewLightRecord(req.SensorID, req.Value, req.Raw)
+	record, err := domain.NewLightRecord(req.SensorID, req.Value, req.Raw)
+	if err != nil {
+		return nil, err
+	}
 	if err := s.sensorRepo.SaveLightRecord(record); err != nil {
 		return nil, err
 	}
 
-	event := domain.NewLightLevelEvent(req.SensorID, req.Value, req.Raw)
+	event, err := domain.NewLightLevelEvent(req.SensorID, req.Value, req.Raw)
+	if err != nil {
+		return nil, err
+	}
 	if err := s.eventPublisher.PublishLightEvent(event); err != nil {
 		// Falha na publicação não cancela o registro
 		_ = err

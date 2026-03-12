@@ -24,7 +24,7 @@ func (r *PostgresUserRepository) Save(user *domain.User) error {
 		INSERT INTO users (id, email, password_hash, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5)
 	`
-	_, err := r.db.Exec(query, user.ID, user.Email, user.PasswordHash, user.CreatedAt, user.UpdatedAt)
+	_, err := r.db.Exec(query, user.ID, user.Email.String(), user.PasswordHash, user.CreatedAt, user.UpdatedAt)
 	if err != nil {
 		return err
 	}
@@ -38,11 +38,12 @@ func (r *PostgresUserRepository) FindByEmail(email string) (*domain.User, error)
 		FROM users
 		WHERE email = $1
 	`
+	var id, emailStr, passwordHash string
 	user := &domain.User{}
 	err := r.db.QueryRow(query, email).Scan(
-		&user.ID,
-		&user.Email,
-		&user.PasswordHash,
+		&id,
+		&emailStr,
+		&passwordHash,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -52,6 +53,13 @@ func (r *PostgresUserRepository) FindByEmail(email string) (*domain.User, error)
 	if err != nil {
 		return nil, err
 	}
+	e, err := domain.NewEmail(emailStr)
+	if err != nil {
+		return nil, err
+	}
+	user.ID = id
+	user.Email = e
+	user.PasswordHash = passwordHash
 	return user, nil
 }
 
@@ -62,11 +70,12 @@ func (r *PostgresUserRepository) FindByID(id string) (*domain.User, error) {
 		FROM users
 		WHERE id = $1
 	`
+	var userID, emailStr, passwordHash string
 	user := &domain.User{}
 	err := r.db.QueryRow(query, id).Scan(
-		&user.ID,
-		&user.Email,
-		&user.PasswordHash,
+		&userID,
+		&emailStr,
+		&passwordHash,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -76,6 +85,13 @@ func (r *PostgresUserRepository) FindByID(id string) (*domain.User, error) {
 	if err != nil {
 		return nil, err
 	}
+	e, err := domain.NewEmail(emailStr)
+	if err != nil {
+		return nil, err
+	}
+	user.ID = userID
+	user.Email = e
+	user.PasswordHash = passwordHash
 	return user, nil
 }
 
