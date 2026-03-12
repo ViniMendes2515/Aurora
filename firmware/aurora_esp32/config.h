@@ -11,7 +11,7 @@
 
 #define DEVICE_API_KEY  "aurora-device-key-2024"
 
-#define SENSOR_PIR_ID  "esp32-pir-001"
+#define SENSOR_PIR_ID  "esp32-pir-001" 
 #define SENSOR_LDR_ID  "esp32-ldr-001"
 
 // ============================================================

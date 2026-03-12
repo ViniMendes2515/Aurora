@@ -43,4 +43,4 @@ dist/
 
 CLAUDE.md
 
-config.h
+firmware/aurora_esp32/config.h
