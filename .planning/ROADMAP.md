@@ -33,7 +33,13 @@
   4. As interfaces `ScheduleRepository`, `ScheduleExecutionRepository`, `ActionDispatcher` e `SchedulerRegistry` estão definidas no pacote domain sem importar nenhuma biblioteca externa
   5. Testes unitários cobrem: validação de cron expression inválida, one-shot sem `run_at`, ação com target inválido e filtragem de dias da semana
 
-**Plans**: TBD
+**Plans**: 4 planos
+
+Plans:
+- [ ] 01-01-PLAN.md — Entidades do dominio (Schedule, ScheduleExecution, Action)
+- [ ] 01-02-PLAN.md — Interfaces e erros do dominio (repositories, dispatcher, registry, errors)
+- [ ] 01-03-PLAN.md — Migracao PostgreSQL (schedules + schedule_executions)
+- [ ] 01-04-PLAN.md — Testes da camada de dominio
 
 **Planos detalhados:**
 
