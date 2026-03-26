@@ -9,7 +9,7 @@
 #define SENSORS_SERVICE_URL   "http://IP_DO_SERVIDOR/api/sensors"
 #define LIGHTING_SERVICE_URL  "http://IP_DO_SERVIDOR/api/lighting"
 
-#define DEVICE_API_KEY  "aurora-device-key-2024"
+#define DEVICE_API_KEY  "KEY_DO_SEU_DISPOSITIVO"
 
 #define SENSOR_PIR_ID  "esp32-pir-001"
 #define SENSOR_LDR_ID  "esp32-ldr-001"

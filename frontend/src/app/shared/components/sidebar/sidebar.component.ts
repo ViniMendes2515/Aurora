@@ -27,7 +27,8 @@ export class SidebarComponent {
     { label: 'Iluminação', icon: 'pi-sun', route: '/dashboard/devices' },
     { label: 'Sensores', icon: 'pi-wifi', route: '/dashboard/sensors' },
     { label: 'Regras', icon: 'pi-cog', route: '/dashboard/rules' },
-    { label: 'Notificações', icon: 'pi-bell', route: '/dashboard/notifications' }, 
+    { label: 'Agendamentos', icon: 'pi-calendar', route: '/dashboard/schedules' },
+    { label: 'Notificações', icon: 'pi-bell', route: '/dashboard/notifications' },
   ];
 
   onMenuClick(): void {

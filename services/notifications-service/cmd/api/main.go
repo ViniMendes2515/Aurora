@@ -14,15 +14,15 @@ import (
 )
 
 func main() {
-	jwtSecret  := getEnv("JWT_SECRET", "default-dev-secret-key")
+	jwtSecret := getEnv("JWT_SECRET", "")
 	serverPort := getEnv("SERVER_PORT", "8085")
-	natsURL    := getEnv("NATS_URL", "nats://localhost:4222")
+	natsURL := getEnv("NATS_URL", "nats://localhost:4222")
 
 	dbConfig := database.Config{
 		Host:     getEnv("DB_HOST", "localhost"),
 		Port:     getEnv("DB_PORT", "5432"),
 		User:     getEnv("DB_USER", "aurora"),
-		Password: getEnv("DB_PASSWORD", "aurora_secret"),
+		Password: getEnv("DB_PASSWORD", ""),
 		DBName:   getEnv("DB_NAME", "aurora_home"),
 		SSLMode:  getEnv("DB_SSLMODE", "disable"),
 	}
@@ -37,7 +37,7 @@ func main() {
 		log.Fatalf("Falha ao executar migrations: %v", err)
 	}
 
-	notifRepo    := repository.NewPostgresNotificationRepository(db)
+	notifRepo := repository.NewPostgresNotificationRepository(db)
 	notifService := application.NewNotificationService(notifRepo)
 	jwtValidator := security.NewJWTValidator(jwtSecret)
 

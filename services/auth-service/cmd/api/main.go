@@ -15,9 +15,6 @@ import (
 func main() {
 	// Configurações
 	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		jwtSecret = "default-dev-secret-key"
-	}
 
 	serverPort := os.Getenv("SERVER_PORT")
 	if serverPort == "" {
@@ -29,7 +26,7 @@ func main() {
 		Host:     getEnv("DB_HOST", "localhost"),
 		Port:     getEnv("DB_PORT", "5432"),
 		User:     getEnv("DB_USER", "aurora"),
-		Password: getEnv("DB_PASSWORD", "aurora_secret"),
+		Password: getEnv("DB_PASSWORD", ""),
 		DBName:   getEnv("DB_NAME", "aurora_home"),
 		SSLMode:  getEnv("DB_SSLMODE", "disable"),
 	}

@@ -16,10 +16,10 @@ import (
 )
 
 func main() {
-	jwtSecret := getEnv("JWT_SECRET", "default-dev-secret-key")
+	jwtSecret := getEnv("JWT_SECRET", "")
 	serverPort := getEnv("SERVER_PORT", "8083")
 	natsURL := getEnv("NATS_URL", "nats://localhost:4222")
-	deviceAPIKey := getEnv("DEVICE_API_KEY", "aurora-device-key-2024")
+	deviceAPIKey := getEnv("DEVICE_API_KEY", "")
 	esp32IP := getEnv("ESP32_IP", "")
 	deviceID := getEnv("DEVICE_ID", "esp32-main")
 	buzzerDurationMs, _ := strconv.Atoi(getEnv("BUZZER_DURATION_MS", "3000"))
@@ -29,7 +29,7 @@ func main() {
 		Host:     getEnv("DB_HOST", "localhost"),
 		Port:     getEnv("DB_PORT", "5432"),
 		User:     getEnv("DB_USER", "aurora"),
-		Password: getEnv("DB_PASSWORD", "aurora_secret"),
+		Password: getEnv("DB_PASSWORD", ""),
 		DBName:   getEnv("DB_NAME", "aurora_home"),
 		SSLMode:  getEnv("DB_SSLMODE", "disable"),
 	}

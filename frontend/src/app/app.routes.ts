@@ -37,6 +37,10 @@ export const routes: Routes = [
         loadComponent: () => import('@features/dashboard/rules/rules.component').then(m => m.RulesComponent)
       },
       {
+        path: 'schedules',
+        loadComponent: () => import('@features/dashboard/schedules/schedules.component').then(m => m.SchedulesComponent)
+      },
+      {
         path: 'notifications',
         loadComponent: () => import('@features/dashboard/notifications/notifications.component').then(m => m.NotificationsComponent)
       }
