@@ -102,8 +102,8 @@ func TestNewSchedule_TimezoneDefault(t *testing.T) {
 	if err != nil {
 		t.Fatalf("esperado sem erro, obteve %v", err)
 	}
-	if s.Timezone != "UTC" {
-		t.Errorf("Timezone vazio deve defaultar para UTC, obteve %s", s.Timezone)
+	if s.Timezone != "America/Sao_Paulo" {
+		t.Errorf("Timezone vazio deve defaultar para America/Sao_Paulo, obteve %s", s.Timezone)
 	}
 }
 

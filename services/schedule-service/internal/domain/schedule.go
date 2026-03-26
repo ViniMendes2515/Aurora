@@ -4,6 +4,8 @@ import (
 	"time"
 )
 
+const DefaultTimezone = "America/Sao_Paulo"
+
 // ScheduleType define o tipo de agendamento
 type ScheduleType string
 
@@ -23,8 +25,8 @@ type Schedule struct {
 	ScheduleType ScheduleType
 	CronExpr     string
 	RunAt        *time.Time
-	DaysFilter   int       // bitmask: 0=all days, Sunday=1, Monday=2, ..., Saturday=64
-	Timezone     string    // IANA timezone string, default "UTC"
+	DaysFilter   int    // bitmask: 0=all days, Sunday=1, Monday=2, ..., Saturday=64
+	Timezone     string // IANA timezone string, default "UTC"
 	Action       Action
 	Enabled      bool
 	CreatedAt    time.Time
@@ -48,7 +50,7 @@ func NewSchedule(id, ownerID, name, description string, scheduleType ScheduleTyp
 		return nil, ErrMissingRunAt
 	}
 	if timezone == "" {
-		timezone = "UTC"
+		timezone = DefaultTimezone
 	}
 	now := time.Now()
 	return &Schedule{

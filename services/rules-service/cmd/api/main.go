@@ -15,19 +15,19 @@ import (
 )
 
 func main() {
-	jwtSecret := getEnv("JWT_SECRET", "default-dev-secret-key")
+	jwtSecret := getEnv("JWT_SECRET", "")
 	serverPort := getEnv("SERVER_PORT", "8084")
 	natsURL := getEnv("NATS_URL", "nats://localhost:4222")
 	lightingURL := getEnv("LIGHTING_SERVICE_URL", "http://lighting-service:8082")
 	securityURL := getEnv("SECURITY_SERVICE_URL", "http://security-service:8083")
-	deviceAPIKey := getEnv("DEVICE_API_KEY", "aurora-device-key-2024")
+	deviceAPIKey := getEnv("DEVICE_API_KEY", "")
 	motionTimeoutSeconds := getEnv("MOTION_OFF_TIMEOUT_SECONDS", "300")
 
 	dbConfig := database.Config{
 		Host:     getEnv("DB_HOST", "localhost"),
 		Port:     getEnv("DB_PORT", "5432"),
 		User:     getEnv("DB_USER", "aurora"),
-		Password: getEnv("DB_PASSWORD", "aurora_secret"),
+		Password: getEnv("DB_PASSWORD", ""),
 		DBName:   getEnv("DB_NAME", "aurora_home"),
 		SSLMode:  getEnv("DB_SSLMODE", "disable"),
 	}

@@ -14,7 +14,7 @@ services:
     container_name: aurora-postgres
     environment:
       POSTGRES_USER: aurora
-      POSTGRES_PASSWORD: aurora_secret
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: aurora_home
     ports:
       - "5432:5432"
@@ -34,12 +34,12 @@ services:
       dockerfile: services/auth-service/Dockerfile
     container_name: aurora-auth-service
     environment:
-      - JWT_SECRET=aurora-super-secret-key-2024
+      - JWT_SECRET=${JWT_SECRET}
       - SERVER_PORT=8080
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=aurora
-      - DB_PASSWORD=aurora_secret
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=aurora_home
       - DB_SSLMODE=disable
     depends_on:
@@ -54,16 +54,16 @@ services:
       dockerfile: services/sensors-service/Dockerfile
     container_name: aurora-sensors-service
     environment:
-      - JWT_SECRET=aurora-super-secret-key-2024
+      - JWT_SECRET=${JWT_SECRET}
       - SERVER_PORT=8081
       - NATS_URL=nats://nats:4222
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=aurora
-      - DB_PASSWORD=aurora_secret
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=aurora_home
       - DB_SSLMODE=disable
-      - DEVICE_API_KEY=aurora-device-key-2024
+      - DEVICE_API_KEY=${DEVICE_API_KEY}
     depends_on:
       postgres:
         condition: service_healthy
@@ -80,15 +80,15 @@ services:
       dockerfile: services/lighting-service/Dockerfile
     container_name: aurora-lighting-service
     environment:
-      - JWT_SECRET=aurora-super-secret-key-2024
+      - JWT_SECRET=${JWT_SECRET}
       - SERVER_PORT=8082
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=aurora
-      - DB_PASSWORD=aurora_secret
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=aurora_home
       - DB_SSLMODE=disable
-      - DEVICE_API_KEY=aurora-device-key-2024
+      - DEVICE_API_KEY=${DEVICE_API_KEY}
       - ESP32_IP=${ESP32_IP}
     depends_on:
       postgres:
@@ -102,16 +102,16 @@ services:
       dockerfile: services/security-service/Dockerfile
     container_name: aurora-security-service
     environment:
-      - JWT_SECRET=aurora-super-secret-key-2024
+      - JWT_SECRET=${JWT_SECRET}
       - SERVER_PORT=8083
       - NATS_URL=nats://nats:4222
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=aurora
-      - DB_PASSWORD=aurora_secret
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=aurora_home
       - DB_SSLMODE=disable
-      - DEVICE_API_KEY=aurora-device-key-2024
+      - DEVICE_API_KEY=${DEVICE_API_KEY}
       - ESP32_IP=${ESP32_IP}
       - DEVICE_ID=esp32-main
       - BUZZER_DURATION_MS=3000
@@ -129,17 +129,17 @@ services:
       dockerfile: services/rules-service/Dockerfile
     container_name: aurora-rules-service
     environment:
-      - JWT_SECRET=aurora-super-secret-key-2024
+      - JWT_SECRET=${JWT_SECRET}
       - SERVER_PORT=8084
       - NATS_URL=nats://nats:4222
       - MOTION_OFF_TIMEOUT_SECONDS=10
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=aurora
-      - DB_PASSWORD=aurora_secret
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=aurora_home
       - DB_SSLMODE=disable
-      - DEVICE_API_KEY=aurora-device-key-2024
+      - DEVICE_API_KEY=${DEVICE_API_KEY}
       - LIGHTING_SERVICE_URL=http://lighting-service:8082
       - SECURITY_SERVICE_URL=http://security-service:8083
     depends_on:
@@ -160,13 +160,13 @@ services:
       dockerfile: services/notifications-service/Dockerfile
     container_name: aurora-notifications-service
     environment:
-      - JWT_SECRET=aurora-super-secret-key-2024
+      - JWT_SECRET=${JWT_SECRET}
       - SERVER_PORT=8085
       - NATS_URL=nats://nats:4222
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=aurora
-      - DB_PASSWORD=aurora_secret
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=aurora_home
       - DB_SSLMODE=disable
     depends_on:
@@ -175,6 +175,38 @@ services:
       nats:
         condition: service_started
       sensors-service:
+        condition: service_started
+    networks:
+      - aurora-network
+
+  schedule-service:
+    build:
+      context: ..
+      dockerfile: services/schedule-service/Dockerfile
+    container_name: aurora-schedule-service
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - SERVER_PORT=8086
+      - NATS_URL=nats://nats:4222
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=aurora
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=aurora_home
+      - DB_SSLMODE=disable
+      - DEVICE_API_KEY=${DEVICE_API_KEY}
+      - LIGHTING_SERVICE_URL=http://lighting-service:8082
+      - SECURITY_SERVICE_URL=http://security-service:8083
+      - MISSED_EXECUTION_GRACE_SECONDS=300
+      - DISPATCH_TIMEOUT_SECONDS=30
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+      lighting-service:
+        condition: service_started
+      security-service:
         condition: service_started
     networks:
       - aurora-network
@@ -210,6 +242,7 @@ services:
       - security-service
       - rules-service
       - notifications-service
+      - schedule-service
     networks:
       - aurora-network
 
