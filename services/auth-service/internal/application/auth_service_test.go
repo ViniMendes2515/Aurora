@@ -1,14 +1,5 @@
 package application_test
 
-// Por que `package application_test` e não `package application`?
-//
-// Usando o sufixo `_test`, ficamos *fora* do pacote — como um consumidor externo.
-// Isso é chamado de "caixa-preta" (black-box test): só testamos o que é exportado.
-// É a melhor prática em Go porque:
-//   1. Garante que a API pública é suficiente (sem depender de internals)
-//   2. Testa o comportamento, não a implementação
-//   3. Refatorações internas não quebram os testes
-
 import (
 	"errors"
 	"testing"
@@ -36,7 +27,7 @@ type mockUserRepo struct {
 	saveErr       error        // erro que Save vai retornar
 }
 
-func (m *mockUserRepo) Save(user *domain.User) error        { return m.saveErr }
+func (m *mockUserRepo) Save(user *domain.User) error { return m.saveErr }
 func (m *mockUserRepo) FindByEmail(email string) (*domain.User, error) {
 	return m.findUser, m.findErr
 }
