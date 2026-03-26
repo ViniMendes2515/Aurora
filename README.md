@@ -23,6 +23,7 @@ O projeto segue uma arquitetura de microsserviços onde cada serviço respeita r
 | security-service | 8083 | Sistema de alarme residencial |
 | rules-service | 8084 | Motor de regras de automação |
 | notifications-service | 8085 | Notificações de eventos do sistema |
+| schedule-service | 8086 | Agendamentos de automação (cron e one-shot) |
 | **Nginx (API Gateway)** | **80** | Roteamento `/api/*` → serviços + serve o frontend Angular |
 
 ### Bounded Contexts
@@ -33,19 +34,27 @@ Cada serviço representa um Bounded Context isolado com domínio próprio:
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                          Aurora Home System                             │
 │                                                                         │
-│  ┌──────────────┐   ┌──────────────────┐   ┌──────────────────────┐   │
-│  │ Auth Context │   │ Sensors Context  │   │  Lighting Context    │   │
-│  │              │   │                  │   │                      │   │
-│  │ - User       │   │ - Sensor         │   │ - Light              │   │
-│  │ - JWT tokens │   │ - MotionEvent    │   │ - LightState         │   │
-│  └──────────────┘   └────────┬─────────┘   └──────────┬───────────┘   │
-│                              │ NATS                    │ NATS          │
-│  ┌──────────────┐   ┌────────▼─────────┐   ┌──────────▼───────────┐   │
-│  │ Rules Context│   │Security Context  │   │Notifications Context │   │
-│  │              │   │                  │   │                      │   │
-│  │ - Rule       │◄──│ - Alarm          │   │ - Notification       │   │
-│  │ - Trigger    │   │ - AlarmEvent     │   │ - EventLog           │   │
-│  └──────────────┘   └──────────────────┘   └──────────────────────┘   │
+│  ┌──────────────┐   ┌──────────────────┐   ┌──────────────────────┐     │
+│  │ Auth Context │   │ Sensors Context  │   │  Lighting Context    │     │
+│  │              │   │                  │   │                      │     │
+│  │ - User       │   │ - Sensor         │   │ - Light              │     │
+│  │ - JWT tokens │   │ - MotionEvent    │   │ - LightState         │     │
+│  └──────────────┘   └────────┬─────────┘   └──────────┬───────────┘     │
+│                              │ NATS                    │ NATS           │
+│  ┌──────────────┐   ┌────────▼─────────┐   ┌──────────▼───────────┐     │
+│  │ Rules Context│   │Security Context  │   │Notifications Context │     │
+│  │              │   │                  │   │                      │     │
+│  │ - Rule       │◄──│ - Alarm          │   │ - Notification       │     │
+│  │ - Trigger    │   │ - AlarmEvent     │   │ - EventLog           │     │
+│  └──────────────┘   └──────────────────┘   └──────────────────────┘     │
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │                     Schedule Context                              │  │
+│  │                                                                   │  │
+│  │  - Schedule (cron / one-shot)    - ScheduleExecution              │  │
+│  │  - CronRunner (gocron/v2)        - HTTPActionClient               │  │
+│  │  Dispara ações HTTP em lighting-service e security-service        │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -54,6 +63,7 @@ Cada serviço representa um Bounded Context isolado com domínio próprio:
 - **HTTP/REST**: Via Gin, roteado pelo Nginx API Gateway
 - **Assíncrono (NATS PubSub)**: Eventos de domínio publicados entre serviços (ex: `sensor.motion.detected` → rules-service e notifications-service)
 - **Real-time (WebSocket)**: Endpoints `/api/sensors/ws` e `/api/lighting/ws` para o frontend Angular
+- **Agendamento (gocron/v2)**: schedule-service dispara ações HTTP para lighting-service e security-service nos horários configurados
 
 ## Como Executar
 
@@ -73,7 +83,7 @@ O frontend Angular estará disponível em `http://localhost` (porta 80, servido 
 
 ### Acessar serviços individualmente (desenvolvimento)
 
-Cada serviço pode ser acessado diretamente pela sua porta (8080–8085) ou via API Gateway na porta 80 com o prefixo `/api/<serviço>/`.
+Cada serviço pode ser acessado diretamente pela sua porta (8080–8086) ou via API Gateway na porta 80 com o prefixo `/api/<serviço>/`.
 
 ## Tecnologias
 
@@ -100,7 +110,8 @@ Aurora/
 │   ├── lighting-service/
 │   ├── rules-service/
 │   ├── security-service/
-│   └── notifications-service/
+│   ├── notifications-service/
+│   └── schedule-service/      # Agendamentos cron
 ├── pkg/
 │   ├── jwt/               # JWTValidator, JWTManager, AuthMiddleware compartilhados
 │   └── database/          # Conexão e health check do PostgreSQL
