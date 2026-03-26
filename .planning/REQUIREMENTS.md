@@ -7,18 +7,18 @@
 
 ### Domínio e Persistência
 
-- [ ] **SCH-01**: Schedule entity com campos: `id`, `owner_id`, `name`, `description`, `schedule_type`, `cron_expr`, `run_at`, `time_of_day`, `days_of_week`, `timezone`, `enabled`, `action_type`, `action_target`, `action_payload`, `created_at`, `updated_at`
-- [ ] **SCH-02**: Agendamentos persistidos no PostgreSQL e carregados ao iniciar o serviço (sobrevive a restarts)
-- [ ] **SCH-03**: Multi-tenant: cada agendamento pertence a um `owner_id`; operações de leitura/escrita/exclusão validam propriedade
-- [ ] **SCH-04**: Tabela `schedule_executions` com: `id`, `schedule_id`, `executed_at`, `status` (success/failure), `error_message`
+- [x] **SCH-01**: Schedule entity com campos: `id`, `owner_id`, `name`, `description`, `schedule_type`, `cron_expr`, `run_at`, `time_of_day`, `days_of_week`, `timezone`, `enabled`, `action_type`, `action_target`, `action_payload`, `created_at`, `updated_at`
+- [x] **SCH-02**: Agendamentos persistidos no PostgreSQL e carregados ao iniciar o serviço (sobrevive a restarts)
+- [x] **SCH-03**: Multi-tenant: cada agendamento pertence a um `owner_id`; operações de leitura/escrita/exclusão validam propriedade
+- [x] **SCH-04**: Tabela `schedule_executions` com: `id`, `schedule_id`, `executed_at`, `status` (success/failure), `error_message`
 
 ### Tipos de Agendamento
 
-- [ ] **SCH-05**: Agendamento por horário fixo diário (ex: todo dia às 16:00)
-- [ ] **SCH-06**: Filtro por dias da semana (ex: só em dias úteis, só no fim de semana)
-- [ ] **SCH-07**: Agendamento one-shot com data/hora absoluta futura (ex: daqui a 2h)
-- [ ] **SCH-08**: Agendamento por expressão cron (ex: `0 8 * * 1` = toda segunda às 8h)
-- [ ] **SCH-09**: Timezone por agendamento (campo IANA timezone string, ex: `America/Sao_Paulo`); execução convertida para UTC internamente
+- [x] **SCH-05**: Agendamento por horário fixo diário (ex: todo dia às 16:00)
+- [x] **SCH-06**: Filtro por dias da semana (ex: só em dias úteis, só no fim de semana)
+- [x] **SCH-07**: Agendamento one-shot com data/hora absoluta futura (ex: daqui a 2h)
+- [x] **SCH-08**: Agendamento por expressão cron (ex: `0 8 * * 1` = toda segunda às 8h)
+- [x] **SCH-09**: Timezone por agendamento (campo IANA timezone string, ex: `America/Sao_Paulo`); execução convertida para UTC internamente
 
 ### Loop de Execução
 
