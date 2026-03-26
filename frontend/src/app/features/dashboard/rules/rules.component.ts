@@ -122,6 +122,14 @@ export class RulesComponent implements OnInit {
     };
   }
 
+  toggleRule(rule: Rule): void {
+    this.rulesService.toggleRule(rule.id).subscribe({
+      next: (updated) => {
+        this.rules = this.rules.map(r => r.id === updated.id ? updated : r);
+      }
+    });
+  }
+
   deleteRule(ruleId: string): void {
     this.rulesService.deleteRule(ruleId).subscribe({
       next: () => {

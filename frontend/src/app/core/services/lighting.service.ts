@@ -17,18 +17,18 @@ export class LightingService {
   constructor(private http: HttpClient) {}
 
   listLights(): Observable<Light[]> {
-    return this.http.get<Light[]>(`${this.baseUrl}/lights`);
+    return this.http.get<Light[]>(this.baseUrl);
   }
 
   turnOn(lightId: string): Observable<Light> {
-    return this.http.post<Light>(`${this.baseUrl}/lights/${lightId}/on`, {});
+    return this.http.post<Light>(`${this.baseUrl}/${lightId}/on`, {});
   }
 
   turnOff(lightId: string): Observable<Light> {
-    return this.http.post<Light>(`${this.baseUrl}/lights/${lightId}/off`, {});
+    return this.http.post<Light>(`${this.baseUrl}/${lightId}/off`, {});
   }
 
   getStatus(lightId: string): Observable<Light> {
-    return this.http.get<Light>(`${this.baseUrl}/lights/${lightId}/status`);
+    return this.http.get<Light>(`${this.baseUrl}/${lightId}/status`);
   }
 }

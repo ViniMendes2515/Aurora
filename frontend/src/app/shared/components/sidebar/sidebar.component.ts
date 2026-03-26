@@ -24,10 +24,10 @@ export class SidebarComponent {
 
   menuItems: MenuItem[] = [
     { label: 'Home', icon: 'pi-home', route: '/dashboard' },
-    { label: 'Dispositivos', icon: 'pi-tablet', route: '/dashboard/devices' },
+    { label: 'Iluminação', icon: 'pi-sun', route: '/dashboard/devices' },
     { label: 'Sensores', icon: 'pi-wifi', route: '/dashboard/sensors' },
     { label: 'Regras', icon: 'pi-cog', route: '/dashboard/rules' },
-    { label: 'Notificações', icon: 'pi-bell', route: '/dashboard/notifications' },
+    { label: 'Notificações', icon: 'pi-bell', route: '/dashboard/notifications' }, 
   ];
 
   onMenuClick(): void {

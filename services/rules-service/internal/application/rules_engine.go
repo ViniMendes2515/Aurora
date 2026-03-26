@@ -136,6 +136,25 @@ func (e *RulesEngine) ListRules(ownerID string) ([]*RuleResponse, error) {
 	return responses, nil
 }
 
+// ToggleRule alterna o estado enabled de uma regra
+func (e *RulesEngine) ToggleRule(ruleID, userID string) (*RuleResponse, error) {
+	rule, err := e.ruleRepo.FindByID(ruleID)
+	if err != nil {
+		return nil, domain.ErrRuleNotFound
+	}
+	if !rule.BelongsTo(userID) {
+		return nil, domain.ErrRuleAccessDenied
+	}
+
+	rule.Enabled = !rule.Enabled
+	rule.UpdatedAt = time.Now()
+
+	if err := e.ruleRepo.Save(rule); err != nil {
+		return nil, err
+	}
+	return toResponse(rule), nil
+}
+
 // DeleteRule remove uma regra
 func (e *RulesEngine) DeleteRule(ruleID, userID string) error {
 	rule, err := e.ruleRepo.FindByID(ruleID)

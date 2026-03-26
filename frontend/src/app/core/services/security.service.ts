@@ -19,14 +19,14 @@ export class SecurityService {
   constructor(private http: HttpClient) {}
 
   getRecentAlarms(): Observable<AlarmEvent[]> {
-    return this.http.get<AlarmEvent[]>(`${this.baseUrl}/alarms`);
+    return this.http.get<AlarmEvent[]>(this.baseUrl);
   }
 
   triggerAlarm(location: string): Observable<AlarmEvent> {
-    return this.http.post<AlarmEvent>(`${this.baseUrl}/alarms/trigger`, { location });
+    return this.http.post<AlarmEvent>(`${this.baseUrl}/trigger`, { location });
   }
 
   silenceAlarm(alarmId: string): Observable<AlarmEvent> {
-    return this.http.post<AlarmEvent>(`${this.baseUrl}/alarms/${alarmId}/silence`, {});
+    return this.http.post<AlarmEvent>(`${this.baseUrl}/${alarmId}/silence`, {});
   }
 }

@@ -64,7 +64,8 @@ func (l *Light) IsOn() bool {
 	return l.State == LightStateOn
 }
 
-// BelongsTo verifica se a luz pertence ao usuário
+// BelongsTo verifica se a luz pertence ao usuário.
+// userID == "*" indica um serviço interno (ex: rules-service via X-Device-Key) — acesso total.
 func (l *Light) BelongsTo(userID string) bool {
-	return l.OwnerID == "*" || l.OwnerID == userID
+	return userID == "*" || l.OwnerID == "*" || l.OwnerID == userID
 }

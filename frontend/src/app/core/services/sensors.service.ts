@@ -36,18 +36,18 @@ export class SensorsService {
   constructor(private http: HttpClient) {}
 
   listSensors(): Observable<Sensor[]> {
-    return this.http.get<Sensor[]>(`${this.baseUrl}/sensors`);
+    return this.http.get<Sensor[]>(this.baseUrl);
   }
 
   getMotionHistory(sensorId: string): Observable<MotionRecord[]> {
-    return this.http.get<MotionRecord[]>(`${this.baseUrl}/sensors/${sensorId}/motion`);
+    return this.http.get<MotionRecord[]>(`${this.baseUrl}/${sensorId}/motion`);
   }
 
   getLightHistory(sensorId: string): Observable<LightRecord[]> {
-    return this.http.get<LightRecord[]>(`${this.baseUrl}/sensors/${sensorId}/light`);
+    return this.http.get<LightRecord[]>(`${this.baseUrl}/${sensorId}/light`);
   }
 
   triggerMotion(sensorId: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/sensors/${sensorId}/motion`, {});
+    return this.http.post(`${this.baseUrl}/${sensorId}/motion`, {});
   }
 }

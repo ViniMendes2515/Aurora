@@ -79,6 +79,31 @@ func (h *Handlers) DeleteRule(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "deleted"})
 }
 
+// ToggleRule handler para PATCH /rules/:id/toggle
+func (h *Handlers) ToggleRule(c *gin.Context) {
+	ruleID := c.Param("id")
+	if ruleID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "rule ID is required"})
+		return
+	}
+
+	userID := c.GetString("userID")
+	resp, err := h.rulesEngine.ToggleRule(ruleID, userID)
+	if err != nil {
+		switch err {
+		case domain.ErrRuleNotFound:
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		case domain.ErrRuleAccessDenied:
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to toggle rule"})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
+
 // UpdateRule handler para PUT /rules/:id
 func (h *Handlers) UpdateRule(c *gin.Context) {
 	ruleID := c.Param("id")

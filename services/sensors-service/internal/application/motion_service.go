@@ -69,6 +69,34 @@ func (s *MotionService) RegisterMotion(req RegisterMotionRequest) (*RegisterMoti
 	}, nil
 }
 
+// RegisterDeviceMotion registra movimento vindo de um dispositivo físico (sem checagem de ownership)
+func (s *MotionService) RegisterDeviceMotion(sensorID string) (*RegisterMotionResponse, error) {
+	if sensorID == "" {
+		return nil, domain.ErrInvalidSensorID
+	}
+
+	sensor, err := s.sensorRepo.FindByID(sensorID)
+	if err != nil {
+		return nil, domain.ErrSensorNotFound
+	}
+
+	event := domain.NewMotionDetectedEvent(sensorID, "device", sensor.Location)
+
+	record := domain.NewMotionRecord(sensorID, "device")
+	if err := s.sensorRepo.SaveMotionRecord(record); err != nil {
+		return nil, err
+	}
+
+	if err := s.eventPublisher.PublishMotionEvent(event); err != nil {
+		// Log do erro mas não falha a operação
+	}
+
+	return &RegisterMotionResponse{
+		Status:  "motion registered",
+		EventID: event.ID,
+	}, nil
+}
+
 // GetSensorByID retorna um sensor pelo ID (para verificações)
 func (s *MotionService) GetSensorByID(sensorID, userID string) (*domain.Sensor, error) {
 	sensor, err := s.sensorRepo.FindByID(sensorID)

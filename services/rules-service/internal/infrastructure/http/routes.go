@@ -22,6 +22,7 @@ func RegisterRoutes(router *gin.Engine, rulesEngine *application.RulesEngine, jw
 		rules.POST("", handlers.CreateRule)
 		rules.DELETE("/:id", handlers.DeleteRule)
 		rules.PUT("/:id", handlers.UpdateRule)
+		rules.PATCH("/:id/toggle", handlers.ToggleRule)
 	}
 
 	router.GET("/health", func(c *gin.Context) {
