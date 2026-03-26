@@ -36,7 +36,7 @@
 **Plans**: 4 planos
 
 Plans:
-- [ ] 01-01-PLAN.md — Entidades do dominio (Schedule, ScheduleExecution, Action)
+- [x] 01-01-PLAN.md — Entidades do dominio (Schedule, ScheduleExecution, Action)
 - [x] 01-02-PLAN.md — Interfaces e erros do dominio (repositories, dispatcher, registry, errors)
 - [x] 01-03-PLAN.md — Migracao PostgreSQL (schedules + schedule_executions)
 - [ ] 01-04-PLAN.md — Testes da camada de dominio
@@ -163,7 +163,7 @@ Atualizar `cmd/api/main.go` com o wiring completo na ordem correta: (1) env vars
 
 | Fase | Planos completos | Status | Concluída |
 |------|-----------------|--------|-----------|
-| 1. Domínio + Schema | 2/4 | In Progress|  |
+| 1. Domínio + Schema | 3/4 | In Progress |  |
 | 2. Camada de Aplicação | 0/5 | Não iniciada | - |
 | 3. Infraestrutura — Repositório + API REST | 0/4 | Não iniciada | - |
 | 4. Scheduler Core + Integração | 0/4 | Não iniciada | - |

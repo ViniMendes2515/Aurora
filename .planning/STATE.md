@@ -4,27 +4,27 @@ milestone: v1.9.1
 milestone_name: milestone
 current_phase: 01
 status: unknown
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-03-26T11:37:04.785Z"
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-03-26T11:37:44.000Z"
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State: Aurora — schedule-service
 
 **Last updated:** 2026-03-26
 **Current phase:** 01
-**Stopped at:** Completed 01-02-PLAN.md
+**Stopped at:** Completed 01-01-PLAN.md
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Agendamentos confiáveis que executam as ações certas no horário certo, mesmo após restart do serviço.
-**Current focus:** Phase 01 — dominio-schema (plan 3/4 complete)
+**Current focus:** Phase 01 — dominio-schema (plan 3/4 complete — plans 01, 02, 03 done; plan 04 remaining)
 
 ## Current Status
 
@@ -53,6 +53,8 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 - **PostgreSQL advisory lock** antes de iniciar o loop gocron
 - **Todos os 18 campos da tabela schedules baked in desde o início** — evita ALTER TABLE retroativos
 - **ON DELETE CASCADE** em schedule_executions — limpeza automática ao deletar agendamento
+- **BelongsTo sem wildcard** — schedules são sempre user-specific (sem "*"), diferente do rules-service
+- **DaysFilter=0 significa todos os dias** — bitmask usa 1<<uint(day) para verificação
 
 ### Research Findings
 
