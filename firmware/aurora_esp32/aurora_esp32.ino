@@ -227,6 +227,9 @@ void setup() {
   server.begin();
   Serial.println("[INIT] Servidor HTTP iniciado na porta 80");
 
+  // Task de sensores no core 0 (WebServer roda no core 1 via loop)
+  xTaskCreatePinnedToCore(sensorTask, "sensorTask", 8192, NULL, 1, NULL, 0);
+
   // Registrar dispositivo nos serviços
   registerDevice();
 
@@ -243,25 +246,33 @@ void setup() {
 }
 
 // ============================================================
-// Loop principal
+// Task FreeRTOS — HTTP de saída (PIR + LDR)
+// Roda no core 0, liberando o core 1 para o WebServer
+// ============================================================
+void sensorTask(void* param) {
+  for (;;) {
+    if (pirTriggered) {
+      pirTriggered = false;
+      Serial.println("[PIR] Movimento detectado!");
+      postDeviceMotion();
+    }
+
+    unsigned long now = millis();
+    if (now - lastLdrRead >= LDR_READ_INTERVAL_MS) {
+      lastLdrRead = now;
+      int raw = analogRead(PIN_LDR);
+      Serial.printf("[LDR] Leitura bruta: %d\n", raw);
+      postLdrReading(raw);
+    }
+
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+  }
+}
+
+// ============================================================
+// Loop principal — apenas WebServer (não bloqueia mais)
 // ============================================================
 void loop() {
-  // Processar requisições HTTP recebidas
   server.handleClient();
-
-  // Processar evento do PIR (fora da ISR para poder usar HTTPClient)
-  if (pirTriggered) {
-    pirTriggered = false;
-    Serial.println("[PIR] Movimento detectado!");
-    postDeviceMotion();
-  }
-
-  // Leitura periódica do LDR
-  unsigned long now = millis();
-  if (now - lastLdrRead >= LDR_READ_INTERVAL_MS) {
-    lastLdrRead = now;
-    int raw = analogRead(PIN_LDR);
-    Serial.printf("[LDR] Leitura bruta: %d\n", raw);
-    postLdrReading(raw);
-  }
+  delay(1);
 }

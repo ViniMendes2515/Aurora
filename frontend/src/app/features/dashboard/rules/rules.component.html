@@ -128,13 +128,22 @@
         </div>
       </div>
       <div class="flex items-center gap-3 flex-shrink-0">
-        <span class="px-2 py-0.5 rounded-full"
-              style="font-family:'Josefin Sans',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;"
-              [style.background]="rule.enabled ? 'rgba(15,140,140,0.1)' : 'rgba(1,28,38,0.5)'"
-              [style.color]="rule.enabled ? '#0F8C8C' : '#3d6477'"
-              [style.border]="rule.enabled ? '1px solid rgba(15,140,140,0.2)' : '1px solid #0d3348'">
-          {{ rule.enabled ? 'Ativa' : 'Inativa' }}
-        </span>
+        <!-- Toggle switch -->
+        <button (click)="toggleRule(rule)" class="flex items-center gap-2 group" style="background:none; border:none; cursor:pointer; padding:0;">
+          <div class="relative" style="width:36px; height:20px;">
+            <div class="absolute inset-0 rounded-full transition-all duration-200"
+                 [style.background]="rule.enabled ? 'rgba(15,140,140,0.25)' : 'rgba(1,28,38,0.8)'"
+                 [style.border]="rule.enabled ? '1px solid rgba(15,140,140,0.4)' : '1px solid #0d3348'"></div>
+            <div class="absolute top-0.5 rounded-full transition-all duration-200"
+                 style="width:16px; height:16px;"
+                 [style.left]="rule.enabled ? '18px' : '2px'"
+                 [style.background]="rule.enabled ? '#0F8C8C' : '#3d6477'"></div>
+          </div>
+          <span style="font-family:'Josefin Sans',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;"
+                [style.color]="rule.enabled ? '#0F8C8C' : '#3d6477'">
+            {{ rule.enabled ? 'Ativa' : 'Inativa' }}
+          </span>
+        </button>
         <button (click)="startEdit(rule)"
                 class="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
                 style="background:transparent; border:1px solid #0d3348; color:#5a8099;"

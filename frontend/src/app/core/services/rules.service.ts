@@ -31,18 +31,22 @@ export class RulesService {
   constructor(private http: HttpClient) {}
 
   listRules(): Observable<Rule[]> {
-    return this.http.get<Rule[]>(`${this.baseUrl}/rules`);
+    return this.http.get<Rule[]>(this.baseUrl);
   }
 
   createRule(req: CreateRuleRequest): Observable<Rule> {
-    return this.http.post<Rule>(`${this.baseUrl}/rules`, req);
+    return this.http.post<Rule>(this.baseUrl, req);
   }
 
   updateRule(ruleId: string, req: CreateRuleRequest): Observable<Rule> {
-    return this.http.put<Rule>(`${this.baseUrl}/rules/${ruleId}`, req);
+    return this.http.put<Rule>(`${this.baseUrl}/${ruleId}`, req);
+  }
+
+  toggleRule(ruleId: string): Observable<Rule> {
+    return this.http.patch<Rule>(`${this.baseUrl}/${ruleId}/toggle`, {});
   }
 
   deleteRule(ruleId: string): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/rules/${ruleId}`);
+    return this.http.delete(`${this.baseUrl}/${ruleId}`);
   }
 }

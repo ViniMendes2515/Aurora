@@ -127,12 +127,7 @@ func (h *Handlers) RegisterDeviceMotion(c *gin.Context) {
 		return
 	}
 
-	req := application.RegisterMotionRequest{
-		SensorID: sensorID,
-		UserID:   "device",
-	}
-
-	response, err := h.motionService.RegisterMotion(req)
+	response, err := h.motionService.RegisterDeviceMotion(sensorID)
 	if err != nil {
 		h.handleDomainError(c, err)
 		return
