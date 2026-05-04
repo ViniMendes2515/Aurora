@@ -13,7 +13,16 @@ import (
 	"aurora/services/security-service/internal/infrastructure/migrations"
 	"aurora/services/security-service/internal/infrastructure/repository"
 	"aurora/services/security-service/internal/infrastructure/security"
+
+	_ "aurora/services/security-service/docs"
 )
+
+// @title           Security Service API
+// @version         1.0
+// @description     Serviço de segurança e alarmes da plataforma Aurora Home.
+
+// @host      localhost:8083
+// @BasePath  /
 
 func main() {
 	jwtSecret := getEnv("JWT_SECRET", "")
@@ -61,7 +70,8 @@ func main() {
 		log.Fatalf("Failed to subscribe to NATS: %v", err)
 	}
 
-	server := httpserver.NewServer(alarmService, jwtValidator, deviceAPIKey, serverPort)
+	debug := os.Getenv("DEBUG") == "true"
+	server := httpserver.NewServer(alarmService, jwtValidator, deviceAPIKey, serverPort, debug)
 
 	log.Printf("Security Service starting on port %s...", serverPort)
 	if err := server.Start(); err != nil {

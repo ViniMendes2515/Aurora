@@ -1,0 +1,332 @@
+basePath: /
+definitions:
+  application.CreateScheduleRequest:
+    properties:
+      action_device_id:
+        type: string
+      action_payload:
+        type: string
+      action_target:
+        type: string
+      action_type:
+        type: string
+      cron_expr:
+        type: string
+      days_filter:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      run_at:
+        type: string
+      schedule_type:
+        $ref: '#/definitions/domain.ScheduleType'
+      timezone:
+        type: string
+    type: object
+  application.UpdateScheduleRequest:
+    properties:
+      action_device_id:
+        type: string
+      action_payload:
+        type: string
+      action_target:
+        type: string
+      action_type:
+        type: string
+      cron_expr:
+        type: string
+      days_filter:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      run_at:
+        type: string
+      timezone:
+        type: string
+    type: object
+  domain.ScheduleType:
+    enum:
+    - cron
+    - one_shot
+    type: string
+    x-enum-varnames:
+    - ScheduleTypeCron
+    - ScheduleTypeOneShot
+host: localhost:8086
+info:
+  contact: {}
+  description: Serviço de agendamentos da plataforma Aurora Home.
+  title: Schedule Service API
+  version: "1.0"
+paths:
+  /schedules:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items: {}
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Lista agendamentos do usuário
+      tags:
+      - schedules
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Dados do agendamento
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/application.CreateScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema: {}
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Cria um novo agendamento
+      tags:
+      - schedules
+  /schedules/{id}:
+    delete:
+      parameters:
+      - description: ID do agendamento
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove um agendamento
+      tags:
+      - schedules
+    get:
+      parameters:
+      - description: ID do agendamento
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Retorna um agendamento por ID
+      tags:
+      - schedules
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID do agendamento
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dados do agendamento
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/application.UpdateScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Atualiza um agendamento
+      tags:
+      - schedules
+  /schedules/{id}/history:
+    get:
+      parameters:
+      - description: ID do agendamento
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Limite de registros (padrão 50)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items: {}
+            type: array
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Histórico de execuções de um agendamento
+      tags:
+      - schedules
+  /schedules/{id}/toggle:
+    patch:
+      parameters:
+      - description: ID do agendamento
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ativa/desativa um agendamento
+      tags:
+      - schedules
+  /schedules/preview:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: schedule_id e count
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items: {}
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Pré-visualiza as próximas execuções de um agendamento
+      tags:
+      - schedules
+swagger: "2.0"

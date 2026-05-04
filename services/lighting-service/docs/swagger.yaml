@@ -1,0 +1,175 @@
+basePath: /
+host: localhost:8082
+info:
+  contact: {}
+  description: Serviço de controle de iluminação da plataforma Aurora Home.
+  title: Lighting Service API
+  version: "1.0"
+paths:
+  /devices/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Chave de autenticação do dispositivo
+        in: header
+        name: X-Device-Key
+        required: true
+        type: string
+      - description: Dados do dispositivo
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Registra um dispositivo ESP32
+      tags:
+      - devices
+  /lights:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items: {}
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Lista todas as luzes do usuário
+      tags:
+      - lights
+  /lights/{id}/off:
+    post:
+      parameters:
+      - description: ID da luz
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Desliga uma luz
+      tags:
+      - lights
+  /lights/{id}/on:
+    post:
+      parameters:
+      - description: ID da luz
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Liga uma luz
+      tags:
+      - lights
+  /lights/{id}/status:
+    get:
+      parameters:
+      - description: ID da luz
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Retorna o status de uma luz
+      tags:
+      - lights
+swagger: "2.0"

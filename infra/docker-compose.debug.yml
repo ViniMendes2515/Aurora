@@ -1,0 +1,42 @@
+services:
+  auth-service:
+    environment:
+      - DEBUG=true
+    ports:
+      - "8080:8080"
+
+  sensors-service:
+    environment:
+      - DEBUG=true
+    ports:
+      - "8081:8081"
+
+  lighting-service:
+    environment:
+      - DEBUG=true
+    ports:
+      - "8082:8082"
+
+  security-service:
+    environment:
+      - DEBUG=true
+    ports:
+      - "8083:8083"
+
+  rules-service:
+    environment:
+      - DEBUG=true
+    ports:
+      - "8084:8084"
+
+  notifications-service:
+    environment:
+      - DEBUG=true
+    ports:
+      - "8085:8085"
+
+  schedule-service:
+    environment:
+      - DEBUG=true
+    ports:
+      - "8086:8086"

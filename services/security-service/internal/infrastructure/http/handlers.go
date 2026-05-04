@@ -18,7 +18,14 @@ func NewHandlers(alarmService *application.AlarmService) *Handlers {
 	return &Handlers{alarmService: alarmService}
 }
 
-// GetRecentAlarms handler para GET /alarms
+// GetRecentAlarms godoc
+// @Summary      Lista os alarmes recentes
+// @Tags         alarms
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200  {array}   interface{}
+// @Failure      500  {object}  map[string]string
+// @Router       /alarms [get]
 func (h *Handlers) GetRecentAlarms(c *gin.Context) {
 	alarms, err := h.alarmService.GetRecentAlarms(20)
 	if err != nil {
@@ -28,9 +35,15 @@ func (h *Handlers) GetRecentAlarms(c *gin.Context) {
 	c.JSON(http.StatusOK, alarms)
 }
 
-// TriggerAlarm handler para POST /alarms/trigger
-// Body opcional: { location, trigger_type, sensor_id }
-// Chamadas internas (rules-service via X-Device-Key) podem enviar trigger_type e sensor_id.
+// TriggerAlarm godoc
+// @Summary      Dispara um alarme
+// @Tags         alarms
+// @Accept       json
+// @Produce      json
+// @Param        body  body      object  false  "Dados opcionais do alarme (location, trigger_type, sensor_id)"
+// @Success      200   {object}  interface{}
+// @Failure      500   {object}  map[string]string
+// @Router       /alarms/trigger [post]
 func (h *Handlers) TriggerAlarm(c *gin.Context) {
 	var body struct {
 		Location    string `json:"location"`
@@ -62,7 +75,15 @@ func (h *Handlers) TriggerAlarm(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// SilenceAlarm handler para POST /alarms/:id/silence
+// SilenceAlarm godoc
+// @Summary      Silencia um alarme ativo
+// @Tags         alarms
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id   path      string  true  "ID do alarme"
+// @Success      200  {object}  interface{}
+// @Failure      404  {object}  map[string]string
+// @Router       /alarms/{id}/silence [post]
 func (h *Handlers) SilenceAlarm(c *gin.Context) {
 	alarmID := c.Param("id")
 	if alarmID == "" {

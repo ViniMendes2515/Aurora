@@ -20,7 +20,17 @@ func NewHandlers(service *application.ScheduleService) *Handlers {
 	return &Handlers{service: service}
 }
 
-// CreateSchedule handler para POST /schedules
+// CreateSchedule godoc
+// @Summary      Cria um novo agendamento
+// @Tags         schedules
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      application.CreateScheduleRequest  true  "Dados do agendamento"
+// @Success      201   {object}  interface{}
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /schedules [post]
 func (h *Handlers) CreateSchedule(c *gin.Context) {
 	userID := c.GetString("userID")
 
@@ -40,7 +50,14 @@ func (h *Handlers) CreateSchedule(c *gin.Context) {
 	c.JSON(http.StatusCreated, resp)
 }
 
-// ListSchedules handler para GET /schedules
+// ListSchedules godoc
+// @Summary      Lista agendamentos do usuário
+// @Tags         schedules
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200  {array}   interface{}
+// @Failure      500  {object}  map[string]string
+// @Router       /schedules [get]
 func (h *Handlers) ListSchedules(c *gin.Context) {
 	userID := c.GetString("userID")
 
@@ -53,7 +70,16 @@ func (h *Handlers) ListSchedules(c *gin.Context) {
 	c.JSON(http.StatusOK, schedules)
 }
 
-// GetSchedule handler para GET /schedules/:id
+// GetSchedule godoc
+// @Summary      Retorna um agendamento por ID
+// @Tags         schedules
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id   path      string  true  "ID do agendamento"
+// @Success      200  {object}  interface{}
+// @Failure      403  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /schedules/{id} [get]
 func (h *Handlers) GetSchedule(c *gin.Context) {
 	userID := c.GetString("userID")
 	id := c.Param("id")
@@ -67,7 +93,19 @@ func (h *Handlers) GetSchedule(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// UpdateSchedule handler para PUT /schedules/:id
+// UpdateSchedule godoc
+// @Summary      Atualiza um agendamento
+// @Tags         schedules
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string                          true  "ID do agendamento"
+// @Param        body  body      application.UpdateScheduleRequest  true  "Dados do agendamento"
+// @Success      200   {object}  interface{}
+// @Failure      400   {object}  map[string]string
+// @Failure      403   {object}  map[string]string
+// @Failure      404   {object}  map[string]string
+// @Router       /schedules/{id} [put]
 func (h *Handlers) UpdateSchedule(c *gin.Context) {
 	userID := c.GetString("userID")
 	id := c.Param("id")
@@ -87,7 +125,16 @@ func (h *Handlers) UpdateSchedule(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// ToggleSchedule handler para PATCH /schedules/:id/toggle
+// ToggleSchedule godoc
+// @Summary      Ativa/desativa um agendamento
+// @Tags         schedules
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id   path      string  true  "ID do agendamento"
+// @Success      200  {object}  interface{}
+// @Failure      403  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /schedules/{id}/toggle [patch]
 func (h *Handlers) ToggleSchedule(c *gin.Context) {
 	userID := c.GetString("userID")
 	id := c.Param("id")
@@ -101,7 +148,16 @@ func (h *Handlers) ToggleSchedule(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// DeleteSchedule handler para DELETE /schedules/:id
+// DeleteSchedule godoc
+// @Summary      Remove um agendamento
+// @Tags         schedules
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id   path      string  true  "ID do agendamento"
+// @Success      200  {object}  map[string]string
+// @Failure      403  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /schedules/{id} [delete]
 func (h *Handlers) DeleteSchedule(c *gin.Context) {
 	userID := c.GetString("userID")
 	id := c.Param("id")
@@ -114,7 +170,17 @@ func (h *Handlers) DeleteSchedule(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "deleted"})
 }
 
-// ListExecutions handler para GET /schedules/:id/history
+// ListExecutions godoc
+// @Summary      Histórico de execuções de um agendamento
+// @Tags         schedules
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id     path      string  true   "ID do agendamento"
+// @Param        limit  query     int     false  "Limite de registros (padrão 50)"
+// @Success      200    {array}   interface{}
+// @Failure      403    {object}  map[string]string
+// @Failure      404    {object}  map[string]string
+// @Router       /schedules/{id}/history [get]
 func (h *Handlers) ListExecutions(c *gin.Context) {
 	userID := c.GetString("userID")
 	id := c.Param("id")
@@ -135,7 +201,17 @@ func (h *Handlers) ListExecutions(c *gin.Context) {
 	c.JSON(http.StatusOK, executions)
 }
 
-// PreviewSchedule handler para POST /schedules/preview
+// PreviewSchedule godoc
+// @Summary      Pré-visualiza as próximas execuções de um agendamento
+// @Tags         schedules
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      object  true  "schedule_id e count"
+// @Success      200   {array}   interface{}
+// @Failure      400   {object}  map[string]string
+// @Failure      403   {object}  map[string]string
+// @Router       /schedules/preview [post]
 func (h *Handlers) PreviewSchedule(c *gin.Context) {
 	userID := c.GetString("userID")
 

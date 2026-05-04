@@ -19,7 +19,17 @@ func NewHandlers(authService *application.AuthService) *Handlers {
 	return &Handlers{authService: authService}
 }
 
-// Register handler para POST /auth/register
+// Register godoc
+// @Summary      Registro de novo usuário
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      application.RegisterRequest   true  "Dados de registro"
+// @Success      201   {object}  application.RegisterResponse
+// @Failure      400   {object}  map[string]string
+// @Failure      409   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /auth/register [post]
 func (h *Handlers) Register(c *gin.Context) {
 	var req application.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -45,7 +55,17 @@ func (h *Handlers) Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, response)
 }
 
-// Login handler para POST /auth/login
+// Login godoc
+// @Summary      Login de usuário
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      application.LoginRequest   true  "Credenciais de login"
+// @Success      200   {object}  application.LoginResponse
+// @Failure      400   {object}  map[string]string
+// @Failure      401   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /auth/login [post]
 func (h *Handlers) Login(c *gin.Context) {
 	var req application.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

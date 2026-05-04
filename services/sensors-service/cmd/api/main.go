@@ -13,7 +13,16 @@ import (
 	"aurora/services/sensors-service/internal/infrastructure/repository"
 	"aurora/services/sensors-service/internal/infrastructure/security"
 	"aurora/services/sensors-service/internal/infrastructure/ws"
+
+	_ "aurora/services/sensors-service/docs"
 )
+
+// @title           Sensors Service API
+// @version         1.0
+// @description     Serviço de sensores da plataforma Aurora Home.
+
+// @host      localhost:8081
+// @BasePath  /
 
 func main() {
 	jwtSecret := getEnv("JWT_SECRET", "")
@@ -66,7 +75,8 @@ func main() {
 	motionService := application.NewMotionService(sensorRepo, eventPublisher)
 	lightService := application.NewLightService(sensorRepo, eventPublisher)
 
-	server := http.NewServer(motionService, lightService, sensorRepo, jwtValidator, deviceAPIKey, hub, serverPort)
+	debug := os.Getenv("DEBUG") == "true"
+	server := http.NewServer(motionService, lightService, sensorRepo, jwtValidator, deviceAPIKey, hub, serverPort, debug)
 
 	log.Printf("Sensors Service starting on port %s...", serverPort)
 	if err := server.Start(); err != nil {

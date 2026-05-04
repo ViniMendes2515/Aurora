@@ -1,0 +1,212 @@
+basePath: /
+definitions:
+  application.CreateRuleRequest:
+    properties:
+      action_id:
+        type: string
+      action_type:
+        $ref: '#/definitions/domain.ActionType'
+      name:
+        type: string
+      trigger_id:
+        type: string
+      trigger_threshold:
+        description: 'Para light_low: considerar luz baixa abaixo deste % (0 = usar
+          30)'
+        type: number
+      trigger_type:
+        $ref: '#/definitions/domain.TriggerType'
+    type: object
+  domain.ActionType:
+    enum:
+    - turn_on_light
+    - turn_off_light
+    - trigger_alarm
+    type: string
+    x-enum-varnames:
+    - ActionTurnOnLight
+    - ActionTurnOffLight
+    - ActionTriggerAlarm
+  domain.TriggerType:
+    enum:
+    - motion
+    - light_low
+    - light_high
+    - schedule
+    type: string
+    x-enum-varnames:
+    - TriggerMotion
+    - TriggerLight
+    - TriggerLightHigh
+    - TriggerSchedule
+host: localhost:8084
+info:
+  contact: {}
+  description: Serviço de regras de automação da plataforma Aurora Home.
+  title: Rules Service API
+  version: "1.0"
+paths:
+  /rules:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items: {}
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Lista regras de automação do usuário
+      tags:
+      - rules
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Dados da regra
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/application.CreateRuleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema: {}
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Cria uma nova regra de automação
+      tags:
+      - rules
+  /rules/{id}:
+    delete:
+      parameters:
+      - description: ID da regra
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove uma regra de automação
+      tags:
+      - rules
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID da regra
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dados da regra
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/application.CreateRuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Atualiza uma regra de automação
+      tags:
+      - rules
+  /rules/{id}/toggle:
+    patch:
+      parameters:
+      - description: ID da regra
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ativa/desativa uma regra de automação
+      tags:
+      - rules
+swagger: "2.0"
