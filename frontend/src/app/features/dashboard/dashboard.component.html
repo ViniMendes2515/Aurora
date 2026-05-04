@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gradient-to-b from-aurora-light to-aurora-base">
   <!-- Overlay para mobile -->
   <div
-    class="sidebar-overlay fixed inset-0 bg-black/60 z-40 opacity-0 pointer-events-none hidden md:hidden transition-opacity duration-300"
+    class="sidebar-overlay fixed inset-0 bg-black/60 z-40 opacity-0 pointer-events-none md:hidden transition-opacity duration-300"
     [class.visible]="isSidebarOpen && !isSidebarCollapsed"
     (click)="closeSidebar()">
   </div>
@@ -10,6 +10,7 @@
     [isOpen]="isSidebarOpen"
     [isCollapsed]="isSidebarCollapsed"
     (logout)="onLogout()"
+    (close)="closeSidebar()"
     (menuClick)="closeSidebar()">
   </app-sidebar>
 

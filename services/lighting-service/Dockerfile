@@ -1,14 +1,24 @@
-FROM golang:1.21-alpine AS builder
+# syntax=docker/dockerfile:1
+FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
-COPY . .
+# Copy go.mod files first — cached unless deps change
+COPY pkg/go.mod pkg/go.sum ./pkg/
+COPY services/lighting-service/go.mod services/lighting-service/go.sum ./services/lighting-service/
 
-WORKDIR /app/services/lighting-service
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    cd services/lighting-service && go mod download
 
-RUN go mod download
+# Copy source and build
+COPY pkg/ ./pkg/
+COPY services/lighting-service/ ./services/lighting-service/
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /lighting-service ./cmd/api
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    cd services/lighting-service && \
+    CGO_ENABLED=0 GOOS=linux go build -o /lighting-service ./cmd/api
 
 FROM alpine:latest
 

@@ -18,7 +18,16 @@ import (
 	"aurora/services/schedule-service/internal/infrastructure/repository"
 	"aurora/services/schedule-service/internal/infrastructure/scheduler"
 	"aurora/services/schedule-service/internal/infrastructure/security"
+
+	_ "aurora/services/schedule-service/docs"
 )
+
+// @title           Schedule Service API
+// @version         1.0
+// @description     Serviço de agendamentos da plataforma Aurora Home.
+
+// @host      localhost:8086
+// @BasePath  /
 
 func main() {
 	jwtSecret := getEnv("JWT_SECRET", "")
@@ -112,8 +121,10 @@ func main() {
 		os.Exit(0)
 	}()
 
+	debug := os.Getenv("DEBUG") == "true"
+
 	// Inicia o servidor HTTP
-	server := httpinfra.NewServer(scheduleService, jwtValidator, serverPort)
+	server := httpinfra.NewServer(scheduleService, jwtValidator, serverPort, debug)
 	log.Printf("Schedule Service starting on port %s...", serverPort)
 	if err := server.Start(); err != nil {
 		log.Fatalf("Failed to start server: %v", err)

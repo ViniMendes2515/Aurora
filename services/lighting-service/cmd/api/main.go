@@ -12,7 +12,16 @@ import (
 	"aurora/services/lighting-service/internal/infrastructure/repository"
 	"aurora/services/lighting-service/internal/infrastructure/security"
 	"aurora/services/lighting-service/internal/infrastructure/ws"
+
+	_ "aurora/services/lighting-service/docs"
 )
+
+// @title           Lighting Service API
+// @version         1.0
+// @description     Serviço de controle de iluminação da plataforma Aurora Home.
+
+// @host      localhost:8082
+// @BasePath  /
 
 func main() {
 	jwtSecret := getEnv("JWT_SECRET", "")
@@ -50,7 +59,8 @@ func main() {
 	hub := ws.NewHub()
 	lightService := application.NewLightService(lightRepo, esp32Client, hub)
 
-	server := httpserver.NewServer(lightService, esp32Client, jwtValidator, deviceAPIKey, hub, serverPort)
+	debug := os.Getenv("DEBUG") == "true"
+	server := httpserver.NewServer(lightService, esp32Client, jwtValidator, deviceAPIKey, hub, serverPort, debug)
 
 	log.Printf("Lighting Service starting on port %s...", serverPort)
 	if err := server.Start(); err != nil {

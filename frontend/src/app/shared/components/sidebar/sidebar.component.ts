@@ -21,6 +21,7 @@ export class SidebarComponent {
   @Input() isCollapsed: boolean = false;
   @Output() logout = new EventEmitter<void>();
   @Output() menuClick = new EventEmitter<void>();
+  @Output() close = new EventEmitter<void>();
 
   menuItems: MenuItem[] = [
     { label: 'Home', icon: 'pi-home', route: '/dashboard' },
@@ -37,5 +38,9 @@ export class SidebarComponent {
 
   onLogout(): void {
     this.logout.emit();
+  }
+
+  onCloseClick(): void {
+    this.close.emit();
   }
 }

@@ -19,12 +19,24 @@ func NewHandler(service *application.NotificationService) *Handler {
 	return &Handler{service: service}
 }
 
-// Health retorna o status de saude do servico
+// Health godoc
+// @Summary      Health check do serviço
+// @Tags         health
+// @Produce      json
+// @Success      200  {object}  map[string]string
+// @Router       /health [get]
 func (h *Handler) Health(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok", "service": "notifications-service"})
 }
 
-// GetNotifications lista as notificacoes do usuario autenticado (proprias + broadcast)
+// GetNotifications godoc
+// @Summary      Lista notificações do usuário autenticado
+// @Tags         notifications
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200  {array}   domain.Notification
+// @Failure      500  {object}  map[string]string
+// @Router       /notifications [get]
 func (h *Handler) GetNotifications(c *gin.Context) {
 	userID := c.GetString("userID")
 
@@ -41,7 +53,17 @@ func (h *Handler) GetNotifications(c *gin.Context) {
 	c.JSON(http.StatusOK, notifications)
 }
 
-// MarkAsRead marca uma notificacao como lida pelo seu ID
+// MarkAsRead godoc
+// @Summary      Marca uma notificação como lida
+// @Tags         notifications
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id   path      string  true  "ID da notificação"
+// @Success      200  {object}  map[string]string
+// @Failure      403  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /notifications/{id}/read [patch]
 func (h *Handler) MarkAsRead(c *gin.Context) {
 	id := c.Param("id")
 	userID := c.GetString("userID")

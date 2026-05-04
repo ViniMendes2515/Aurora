@@ -31,7 +31,16 @@ func NewHandlers(motionService *application.MotionService, lightService *applica
 // Endpoints para usuários autenticados (JWT)
 // ---------------------------------------------------------------
 
-// RegisterMotion handler para POST /sensors/:id/motion
+// RegisterMotion godoc
+// @Summary      Registra evento de movimento via usuário autenticado
+// @Tags         sensors
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id   path      string  true  "ID do sensor"
+// @Success      200  {object}  interface{}
+// @Failure      400  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
+// @Router       /sensors/{id}/motion [post]
 func (h *Handlers) RegisterMotion(c *gin.Context) {
 	sensorID := c.Param("id")
 	if sensorID == "" {
@@ -59,7 +68,15 @@ func (h *Handlers) RegisterMotion(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// ListSensors handler para GET /sensors
+// ListSensors godoc
+// @Summary      Lista sensores do usuário autenticado
+// @Tags         sensors
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200  {array}   interface{}
+// @Failure      401  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /sensors [get]
 func (h *Handlers) ListSensors(c *gin.Context) {
 	userID := c.GetString("userID")
 	if userID == "" {
@@ -76,7 +93,16 @@ func (h *Handlers) ListSensors(c *gin.Context) {
 	c.JSON(http.StatusOK, sensors)
 }
 
-// GetMotionHistory handler para GET /sensors/:id/motion
+// GetMotionHistory godoc
+// @Summary      Histórico de eventos de movimento de um sensor
+// @Tags         sensors
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id   path      string  true  "ID do sensor"
+// @Success      200  {array}   interface{}
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /sensors/{id}/motion [get]
 func (h *Handlers) GetMotionHistory(c *gin.Context) {
 	sensorID := c.Param("id")
 	if sensorID == "" {
@@ -93,7 +119,16 @@ func (h *Handlers) GetMotionHistory(c *gin.Context) {
 	c.JSON(http.StatusOK, records)
 }
 
-// GetLightHistory handler para GET /sensors/:id/light
+// GetLightHistory godoc
+// @Summary      Histórico de eventos de luminosidade de um sensor
+// @Tags         sensors
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id   path      string  true  "ID do sensor"
+// @Success      200  {array}   interface{}
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /sensors/{id}/light [get]
 func (h *Handlers) GetLightHistory(c *gin.Context) {
 	sensorID := c.Param("id")
 	if sensorID == "" {
@@ -114,7 +149,16 @@ func (h *Handlers) GetLightHistory(c *gin.Context) {
 // Endpoints para dispositivos (API Key — sem JWT)
 // ---------------------------------------------------------------
 
-// RegisterDeviceMotion handler para POST /sensors/device/:id/motion
+// RegisterDeviceMotion godoc
+// @Summary      Registra evento de movimento via dispositivo (ESP32)
+// @Tags         device
+// @Produce      json
+// @Param        X-Device-Key  header    string  true  "Chave de autenticação do dispositivo"
+// @Param        id            path      string  true  "ID do sensor"
+// @Success      200  {object}  interface{}
+// @Failure      400  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
+// @Router       /sensors/device/{id}/motion [post]
 func (h *Handlers) RegisterDeviceMotion(c *gin.Context) {
 	if !h.validateDeviceKey(c) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid device key"})
@@ -136,7 +180,18 @@ func (h *Handlers) RegisterDeviceMotion(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// RegisterDeviceLight handler para POST /sensors/device/:id/light
+// RegisterDeviceLight godoc
+// @Summary      Registra evento de luminosidade via dispositivo (ESP32)
+// @Tags         device
+// @Accept       json
+// @Produce      json
+// @Param        X-Device-Key  header    string  true   "Chave de autenticação do dispositivo"
+// @Param        id            path      string  true   "ID do sensor"
+// @Param        body          body      object  true   "Valor de luminosidade"
+// @Success      200  {object}  interface{}
+// @Failure      400  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
+// @Router       /sensors/device/{id}/light [post]
 func (h *Handlers) RegisterDeviceLight(c *gin.Context) {
 	if !h.validateDeviceKey(c) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid device key"})

@@ -10,7 +10,16 @@ import (
 	"aurora/services/auth-service/internal/infrastructure/migrations"
 	"aurora/services/auth-service/internal/infrastructure/repository"
 	"aurora/services/auth-service/internal/infrastructure/security"
+
+	_ "aurora/services/auth-service/docs"
 )
+
+// @title           Auth Service API
+// @version         1.0
+// @description     Serviço de autenticação da plataforma Aurora Home.
+
+// @host      localhost:8080
+// @BasePath  /
 
 func main() {
 	// Configurações
@@ -50,8 +59,10 @@ func main() {
 	// Application Layer
 	authService := application.NewAuthService(userRepo, jwtManager)
 
+	debug := os.Getenv("DEBUG") == "true"
+
 	// HTTP Server
-	server := http.NewServer(authService, serverPort)
+	server := http.NewServer(authService, serverPort, debug)
 
 	log.Printf("Auth Service starting on port %s...", serverPort)
 	if err := server.Start(); err != nil {

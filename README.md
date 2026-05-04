@@ -69,21 +69,64 @@ Cada serviço representa um Bounded Context isolado com domínio próprio:
 
 ### Pré-requisitos
 
-- Docker
-- Docker Compose
+- Docker e Docker Compose
+- Go 1.21+
+- [swag CLI](https://github.com/swaggo/swag) (`go install github.com/swaggo/swag/cmd/swag@latest`)
+
+### Makefile
+
+O projeto tem um Makefile na raiz com os principais comandos. Para ver todos:
+
+```bash
+make help
+```
+
+#### Comandos mais usados
+
+```bash
+make up            # sobe todos os serviços em background
+make up-build      # sobe rebuilding as imagens
+make debug         # sobe em modo debug (Swagger ativo + portas expostas)
+make down          # derruba tudo
+make logs          # logs de todos os serviços
+make logs-<svc>    # logs de um serviço  ex: make logs-auth-service
+make test          # roda os testes de todos os serviços
+make build         # compila todos os serviços
+make swagger       # regenera a documentação Swagger de todos os serviços
+```
 
 ### Subindo o Sistema
 
 ```bash
-cd infra
-docker compose up --build
+make up-build
 ```
 
 O frontend Angular estará disponível em `http://localhost` (porta 80, servido pelo Nginx).
 
-### Acessar serviços individualmente (desenvolvimento)
+### Modo Debug (Swagger)
 
-Cada serviço pode ser acessado diretamente pela sua porta (8080–8086) ou via API Gateway na porta 80 com o prefixo `/api/<serviço>/`.
+```bash
+make debug
+```
+
+Sobe todos os serviços com `DEBUG=true` e expõe as portas diretamente no host. A documentação Swagger fica disponível em:
+
+| Serviço | URL |
+|---|---|
+| auth-service | http://localhost:8080/swagger/index.html |
+| sensors-service | http://localhost:8081/swagger/index.html |
+| lighting-service | http://localhost:8082/swagger/index.html |
+| security-service | http://localhost:8083/swagger/index.html |
+| rules-service | http://localhost:8084/swagger/index.html |
+| notifications-service | http://localhost:8085/swagger/index.html |
+| schedule-service | http://localhost:8086/swagger/index.html |
+
+Para regenerar os docs após alterar anotações nos handlers:
+
+```bash
+make swagger          # todos os serviços
+make swagger-<svc>    # ex: make swagger-auth-service
+```
 
 ## Tecnologias
 
@@ -96,22 +139,27 @@ Cada serviço pode ser acessado diretamente pela sua porta (8080–8086) ou via 
 - **Nginx** — API Gateway e servidor do frontend em produção
 - **Docker / Docker Compose** — Containerização e orquestração local
 - **JWT HS256** — Autenticação stateless com expiração de 1 hora
+- **Swagger (swaggo/swag)** — Documentação interativa das APIs, disponível em modo debug
 
 ## Estrutura do Projeto
 
 ```
 Aurora/
+├── Makefile                   # Comandos principais do projeto
 ├── infra/
 │   ├── docker-compose.yml
-│   └── nginx/             # Configuração do API Gateway
+│   ├── docker-compose.debug.yml   # Override para modo debug (Swagger + portas)
+│   └── nginx/                 # Configuração do API Gateway
 ├── services/
 │   ├── auth-service/
+│   │   ├── docs/              # Swagger gerado (swag init)
+│   │   └── ...
 │   ├── sensors-service/
 │   ├── lighting-service/
 │   ├── rules-service/
 │   ├── security-service/
 │   ├── notifications-service/
-│   └── schedule-service/      # Agendamentos cron
+│   └── schedule-service/
 ├── pkg/
 │   ├── jwt/               # JWTValidator, JWTManager, AuthMiddleware compartilhados
 │   └── database/          # Conexão e health check do PostgreSQL

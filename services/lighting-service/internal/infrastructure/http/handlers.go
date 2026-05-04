@@ -26,7 +26,14 @@ func NewHandlers(lightService *application.LightService, esp32Client *device.ESP
 	}
 }
 
-// ListLights handler para GET /lights
+// ListLights godoc
+// @Summary      Lista todas as luzes do usuário
+// @Tags         lights
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200  {array}   interface{}
+// @Failure      500  {object}  map[string]string
+// @Router       /lights [get]
 func (h *Handlers) ListLights(c *gin.Context) {
 	userID := c.GetString("userID")
 	lights, err := h.lightService.ListLights(userID)
@@ -37,7 +44,17 @@ func (h *Handlers) ListLights(c *gin.Context) {
 	c.JSON(http.StatusOK, lights)
 }
 
-// TurnOn handler para POST /lights/:id/on
+// TurnOn godoc
+// @Summary      Liga uma luz
+// @Tags         lights
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id   path      string  true  "ID da luz"
+// @Success      200  {object}  interface{}
+// @Failure      400  {object}  map[string]string
+// @Failure      403  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /lights/{id}/on [post]
 func (h *Handlers) TurnOn(c *gin.Context) {
 	lightID := c.Param("id")
 	if lightID == "" {
@@ -55,7 +72,17 @@ func (h *Handlers) TurnOn(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// TurnOff handler para POST /lights/:id/off
+// TurnOff godoc
+// @Summary      Desliga uma luz
+// @Tags         lights
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id   path      string  true  "ID da luz"
+// @Success      200  {object}  interface{}
+// @Failure      400  {object}  map[string]string
+// @Failure      403  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /lights/{id}/off [post]
 func (h *Handlers) TurnOff(c *gin.Context) {
 	lightID := c.Param("id")
 	if lightID == "" {
@@ -73,7 +100,16 @@ func (h *Handlers) TurnOff(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// GetLightStatus handler para GET /lights/:id/status
+// GetLightStatus godoc
+// @Summary      Retorna o status de uma luz
+// @Tags         lights
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id   path      string  true  "ID da luz"
+// @Success      200  {object}  interface{}
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /lights/{id}/status [get]
 func (h *Handlers) GetLightStatus(c *gin.Context) {
 	lightID := c.Param("id")
 	if lightID == "" {
@@ -91,7 +127,17 @@ func (h *Handlers) GetLightStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// RegisterDevice handler para POST /devices/register (ESP32 registra seu IP)
+// RegisterDevice godoc
+// @Summary      Registra um dispositivo ESP32
+// @Tags         devices
+// @Accept       json
+// @Produce      json
+// @Param        X-Device-Key  header    string  true  "Chave de autenticação do dispositivo"
+// @Param        body          body      object  true  "Dados do dispositivo"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
+// @Router       /devices/register [post]
 func (h *Handlers) RegisterDevice(c *gin.Context) {
 	if c.GetHeader("X-Device-Key") != h.deviceAPIKey {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid device key"})

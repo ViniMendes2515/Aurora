@@ -1,19 +1,24 @@
-FROM golang:1.21-alpine AS builder
+# syntax=docker/dockerfile:1
+FROM golang:1.23-alpine AS builder
 
-# Diretório base do monorepo dentro da imagem
 WORKDIR /app
 
-# Copia TODO o monorepo (inclui services/ e pkg/)
-COPY . .
+# Copy go.mod files first — cached unless deps change
+COPY pkg/go.mod pkg/go.sum ./pkg/
+COPY services/sensors-service/go.mod services/sensors-service/go.sum ./services/sensors-service/
 
-# Entra na pasta do serviço de sensores
-WORKDIR /app/services/sensors-service
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    cd services/sensors-service && go mod download
 
-# Baixa as dependências com base no go.mod do serviço
-RUN go mod download
+# Copy source and build
+COPY pkg/ ./pkg/
+COPY services/sensors-service/ ./services/sensors-service/
 
-# Build do binário do serviço
-RUN CGO_ENABLED=0 GOOS=linux go build -o /sensors-service ./cmd/api
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    cd services/sensors-service && \
+    CGO_ENABLED=0 GOOS=linux go build -o /sensors-service ./cmd/api
 
 FROM alpine:latest
 

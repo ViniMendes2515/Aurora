@@ -19,7 +19,14 @@ func NewHandlers(rulesEngine *application.RulesEngine) *Handlers {
 	return &Handlers{rulesEngine: rulesEngine}
 }
 
-// ListRules handler para GET /rules
+// ListRules godoc
+// @Summary      Lista regras de automação do usuário
+// @Tags         rules
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200  {array}   interface{}
+// @Failure      500  {object}  map[string]string
+// @Router       /rules [get]
 func (h *Handlers) ListRules(c *gin.Context) {
 	userID := c.GetString("userID")
 	rules, err := h.rulesEngine.ListRules(userID)
@@ -30,7 +37,17 @@ func (h *Handlers) ListRules(c *gin.Context) {
 	c.JSON(http.StatusOK, rules)
 }
 
-// CreateRule handler para POST /rules
+// CreateRule godoc
+// @Summary      Cria uma nova regra de automação
+// @Tags         rules
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      application.CreateRuleRequest  true  "Dados da regra"
+// @Success      201   {object}  interface{}
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /rules [post]
 func (h *Handlers) CreateRule(c *gin.Context) {
 	userID := c.GetString("userID")
 
@@ -55,7 +72,16 @@ func (h *Handlers) CreateRule(c *gin.Context) {
 	c.JSON(http.StatusCreated, response)
 }
 
-// DeleteRule handler para DELETE /rules/:id
+// DeleteRule godoc
+// @Summary      Remove uma regra de automação
+// @Tags         rules
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id   path      string  true  "ID da regra"
+// @Success      200  {object}  map[string]string
+// @Failure      403  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /rules/{id} [delete]
 func (h *Handlers) DeleteRule(c *gin.Context) {
 	ruleID := c.Param("id")
 	if ruleID == "" {
@@ -79,7 +105,16 @@ func (h *Handlers) DeleteRule(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "deleted"})
 }
 
-// ToggleRule handler para PATCH /rules/:id/toggle
+// ToggleRule godoc
+// @Summary      Ativa/desativa uma regra de automação
+// @Tags         rules
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id   path      string  true  "ID da regra"
+// @Success      200  {object}  interface{}
+// @Failure      403  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /rules/{id}/toggle [patch]
 func (h *Handlers) ToggleRule(c *gin.Context) {
 	ruleID := c.Param("id")
 	if ruleID == "" {
@@ -104,7 +139,19 @@ func (h *Handlers) ToggleRule(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// UpdateRule handler para PUT /rules/:id
+// UpdateRule godoc
+// @Summary      Atualiza uma regra de automação
+// @Tags         rules
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string                         true  "ID da regra"
+// @Param        body  body      application.CreateRuleRequest  true  "Dados da regra"
+// @Success      200   {object}  interface{}
+// @Failure      400   {object}  map[string]string
+// @Failure      403   {object}  map[string]string
+// @Failure      404   {object}  map[string]string
+// @Router       /rules/{id} [put]
 func (h *Handlers) UpdateRule(c *gin.Context) {
 	ruleID := c.Param("id")
 	if ruleID == "" {

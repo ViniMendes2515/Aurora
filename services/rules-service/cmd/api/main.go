@@ -12,7 +12,16 @@ import (
 	"aurora/services/rules-service/internal/infrastructure/migrations"
 	"aurora/services/rules-service/internal/infrastructure/repository"
 	"aurora/services/rules-service/internal/infrastructure/security"
+
+	_ "aurora/services/rules-service/docs"
 )
+
+// @title           Rules Service API
+// @version         1.0
+// @description     Serviço de regras de automação da plataforma Aurora Home.
+
+// @host      localhost:8084
+// @BasePath  /
 
 func main() {
 	jwtSecret := getEnv("JWT_SECRET", "")
@@ -64,7 +73,8 @@ func main() {
 		log.Fatalf("Failed to subscribe to NATS: %v", err)
 	}
 
-	server := httpserver.NewServer(rulesEngine, jwtValidator, serverPort)
+	debug := os.Getenv("DEBUG") == "true"
+	server := httpserver.NewServer(rulesEngine, jwtValidator, serverPort, debug)
 
 	log.Printf("Rules Service starting on port %s...", serverPort)
 	if err := server.Start(); err != nil {

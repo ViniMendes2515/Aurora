@@ -11,7 +11,16 @@ import (
 	"aurora/services/notifications-service/internal/infrastructure/migrations"
 	"aurora/services/notifications-service/internal/infrastructure/repository"
 	"aurora/services/notifications-service/internal/infrastructure/security"
+
+	_ "aurora/services/notifications-service/docs"
 )
+
+// @title           Notifications Service API
+// @version         1.0
+// @description     Serviço de notificações da plataforma Aurora Home.
+
+// @host      localhost:8085
+// @BasePath  /
 
 func main() {
 	jwtSecret := getEnv("JWT_SECRET", "")
@@ -51,7 +60,8 @@ func main() {
 		log.Fatalf("Falha ao registrar subscricoes NATS: %v", err)
 	}
 
-	server := httpserver.NewServer(notifService, jwtValidator, serverPort)
+	debug := os.Getenv("DEBUG") == "true"
+	server := httpserver.NewServer(notifService, jwtValidator, serverPort, debug)
 	log.Printf("Notifications Service iniciando na porta %s...", serverPort)
 	if err := server.Start(); err != nil {
 		log.Fatalf("Falha ao iniciar servidor: %v", err)
