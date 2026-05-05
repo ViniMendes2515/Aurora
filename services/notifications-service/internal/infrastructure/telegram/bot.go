@@ -13,10 +13,11 @@ import (
 )
 
 var notificationTemplates = map[string]string{
-	string(domain.TypeMotionDetected): "🚨 <b>Movimento detectado</b> em %s",
-	string(domain.TypeLightOn):        "💡 Luz <b>ligada</b> em %s",
-	string(domain.TypeLightOff):       "💡 Luz <b>desligada</b> em %s",
-	string(domain.TypeAlarmTriggered): "🔔 <b>Alarme acionado</b> em %s",
+	string(domain.TypeMotionDetected):  "🚨 <b>Movimento detectado</b> em %s",
+	string(domain.TypeLightOn):         "💡 Luz <b>ligada</b> em %s",
+	string(domain.TypeLightOff):        "💡 Luz <b>desligada</b> em %s",
+	string(domain.TypeAlarmTriggered):  "🔔 <b>Alarme acionado</b> em %s",
+	string(domain.TypeScheduleExecuted): "⏰ <b>%s</b> executado com sucesso",
 }
 
 // TelegramService e a interface que o bot usa para manipular preferencias
