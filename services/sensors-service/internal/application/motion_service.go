@@ -80,9 +80,14 @@ func (s *MotionService) RegisterDeviceMotion(sensorID string) (*RegisterMotionRe
 		return nil, domain.ErrSensorNotFound
 	}
 
-	event := domain.NewMotionDetectedEvent(sensorID, "device", sensor.Location)
+	userID := sensor.OwnerID
+	if userID == "" {
+		userID = "device"
+	}
 
-	record := domain.NewMotionRecord(sensorID, "device")
+	event := domain.NewMotionDetectedEvent(sensorID, userID, sensor.Location)
+
+	record := domain.NewMotionRecord(sensorID, userID)
 	if err := s.sensorRepo.SaveMotionRecord(record); err != nil {
 		return nil, err
 	}

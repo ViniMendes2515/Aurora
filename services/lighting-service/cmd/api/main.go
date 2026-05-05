@@ -11,6 +11,7 @@ import (
 	"aurora/services/lighting-service/internal/infrastructure/migrations"
 	"aurora/services/lighting-service/internal/infrastructure/repository"
 	"aurora/services/lighting-service/internal/infrastructure/security"
+	"aurora/services/lighting-service/internal/infrastructure/messaging"
 	"aurora/services/lighting-service/internal/infrastructure/ws"
 
 	_ "aurora/services/lighting-service/docs"
@@ -28,6 +29,7 @@ func main() {
 	serverPort := getEnv("SERVER_PORT", "8082")
 	deviceAPIKey := getEnv("DEVICE_API_KEY", "")
 	esp32IP := getEnv("ESP32_IP", "")
+	natsURL := getEnv("NATS_URL", "nats://localhost:4222")
 
 	dbConfig := database.Config{
 		Host:     getEnv("DB_HOST", "localhost"),
@@ -57,7 +59,16 @@ func main() {
 	jwtValidator := security.NewJWTValidator(jwtSecret)
 
 	hub := ws.NewHub()
-	lightService := application.NewLightService(lightRepo, esp32Client, hub)
+
+	natsPublisher, err := messaging.NewNATSLightPublisher(natsURL)
+	if err != nil {
+		log.Printf("Aviso: falha ao conectar ao NATS — eventos de luz nao serao publicados: %v", err)
+	}
+	if natsPublisher != nil {
+		defer natsPublisher.Close()
+	}
+
+	lightService := application.NewLightService(lightRepo, esp32Client, hub, natsPublisher)
 
 	debug := os.Getenv("DEBUG") == "true"
 	server := httpserver.NewServer(lightService, esp32Client, jwtValidator, deviceAPIKey, hub, serverPort, debug)

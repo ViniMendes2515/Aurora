@@ -19,11 +19,12 @@ var (
 type NotificationType string
 
 const (
-	// TypeMotionDetected indica deteccao de movimento por sensor
-	TypeMotionDetected NotificationType = "motion_detected"
-
-	// TypeLightLow indica luminosidade abaixo do limiar configurado
-	TypeLightLow NotificationType = "light_low"
+	TypeMotionDetected  NotificationType = "motion_detected"
+	TypeLightLow        NotificationType = "light_low"
+	TypeLightOn         NotificationType = "light_on"
+	TypeLightOff        NotificationType = "light_off"
+	TypeAlarmTriggered  NotificationType = "alarm_triggered"
+	TypeScheduleExecuted NotificationType = "schedule_executed"
 )
 
 // Notification representa uma notificacao gerada por um evento do sistema

@@ -18,6 +18,16 @@ func RunAuthMigrations(db *sql.DB) error {
 		);
 
 		CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+		INSERT INTO users (id, email, password_hash, created_at, updated_at)
+		VALUES (
+			'00000000-0000-0000-0000-000000000001',
+			'admin@aurora.local',
+			'$2a$10$6WO1jUPrFGoUlEEf6v7fo.aKowknXNK2beWpbFXhf4vLATz/bbw7G',
+			NOW(),
+			NOW()
+		)
+		ON CONFLICT (id) DO NOTHING;
 	`
 
 	_, err := db.Exec(migration)

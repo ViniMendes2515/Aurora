@@ -7,32 +7,39 @@ import (
 	"aurora/services/security-service/internal/domain"
 )
 
+// AlarmEventPublisher publica eventos de alarme no NATS
+type AlarmEventPublisher interface {
+	PublishAlarmTriggered(alarmID, userID, triggerType, sensorID, location string)
+}
+
 // AlarmService implementa os casos de uso de segurança
 type AlarmService struct {
-	alarmRepo     domain.AlarmRepository
-	buzzerClient  domain.BuzzerClient
+	alarmRepo      domain.AlarmRepository
+	buzzerClient   domain.BuzzerClient
 	buzzerDuration time.Duration
-	deviceID      string
+	deviceID       string
+	eventPublisher AlarmEventPublisher
 }
 
 // NewAlarmService cria uma nova instância de AlarmService
-func NewAlarmService(alarmRepo domain.AlarmRepository, buzzerClient domain.BuzzerClient, buzzerDurationMs int, deviceID string) *AlarmService {
+func NewAlarmService(alarmRepo domain.AlarmRepository, buzzerClient domain.BuzzerClient, buzzerDurationMs int, deviceID string, eventPublisher AlarmEventPublisher) *AlarmService {
 	return &AlarmService{
 		alarmRepo:      alarmRepo,
 		buzzerClient:   buzzerClient,
 		buzzerDuration: time.Duration(buzzerDurationMs) * time.Millisecond,
 		deviceID:       deviceID,
+		eventPublisher: eventPublisher,
 	}
 }
 
 // AlarmResponse representa a resposta de um alarme
 type AlarmResponse struct {
-	ID          string            `json:"id"`
-	TriggerType string            `json:"trigger_type"`
-	SensorID    string            `json:"sensor_id"`
-	Location    string            `json:"location"`
+	ID          string             `json:"id"`
+	TriggerType string             `json:"trigger_type"`
+	SensorID    string             `json:"sensor_id"`
+	Location    string             `json:"location"`
 	Status      domain.AlarmStatus `json:"status"`
-	TriggeredAt time.Time         `json:"triggered_at"`
+	TriggeredAt time.Time          `json:"triggered_at"`
 }
 
 func toResponse(a *domain.AlarmEvent) *AlarmResponse {
@@ -47,8 +54,8 @@ func toResponse(a *domain.AlarmEvent) *AlarmResponse {
 }
 
 // TriggerAlarm aciona o alarme (chamado pelo subscriber NATS ou por API)
-func (s *AlarmService) TriggerAlarm(triggerType, sensorID, location string) (*AlarmResponse, error) {
-	event, err := domain.NewAlarmEvent(triggerType, sensorID, location)
+func (s *AlarmService) TriggerAlarm(userID, triggerType, sensorID, location string) (*AlarmResponse, error) {
+	event, err := domain.NewAlarmEvent(userID, triggerType, sensorID, location)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +64,10 @@ func (s *AlarmService) TriggerAlarm(triggerType, sensorID, location string) (*Al
 		return nil, err
 	}
 
-	// Acionar buzzer em goroutine (não bloqueia)
+	if s.eventPublisher != nil {
+		s.eventPublisher.PublishAlarmTriggered(event.ID, userID, triggerType, sensorID, location)
+	}
+
 	go func() {
 		log.Printf("[Alarm] Acionando buzzer por %v (trigger: %s, sensor: %s)", s.buzzerDuration, triggerType, sensorID)
 		if err := s.buzzerClient.TurnOn(s.deviceID); err != nil {

@@ -1,7 +1,9 @@
 package application
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -9,24 +11,23 @@ import (
 )
 
 const (
-	// lightLowThreshold e o limiar de luminosidade (%) abaixo do qual uma notificacao e criada
 	lightLowThreshold = 30.0
-
-	// lightLowCooldown evita notificacoes repetidas para o mesmo sensor em curto intervalo
-	lightLowCooldown = 5 * time.Minute
+	lightLowCooldown  = 5 * time.Minute
 )
 
 // NotificationService contem a logica de negocio de notificacoes
 type NotificationService struct {
 	repo         domain.NotificationRepository
+	telegram     *TelegramService
 	mu           sync.Mutex
-	lastLightLow map[string]time.Time // sensorID -> ultima notificacao enviada
+	lastLightLow map[string]time.Time
 }
 
 // NewNotificationService cria uma nova instancia do servico
-func NewNotificationService(repo domain.NotificationRepository) *NotificationService {
+func NewNotificationService(repo domain.NotificationRepository, telegram *TelegramService) *NotificationService {
 	return &NotificationService{
 		repo:         repo,
+		telegram:     telegram,
 		lastLightLow: make(map[string]time.Time),
 	}
 }
@@ -59,7 +60,13 @@ func (s *NotificationService) HandleMotionDetected(sensorID, userID, location st
 		sensorID,
 		location,
 	)
-	return s.repo.Save(n)
+	if err := s.repo.Save(n); err != nil {
+		return err
+	}
+	if s.telegram != nil {
+		s.telegram.SendIfEnabled(context.Background(), userID, string(domain.TypeMotionDetected), location)
+	}
+	return nil
 }
 
 // HandleLightLow processa evento NATS de luminosidade e cria notificacao se abaixo do limiar.
@@ -87,4 +94,75 @@ func (s *NotificationService) HandleLightLow(sensorID string, value float64) err
 		"",
 	)
 	return s.repo.Save(n)
+}
+
+// HandleLightChanged processa eventos de luz ligada/desligada
+func (s *NotificationService) HandleLightChanged(deviceID, userID, location string, isOn bool) error {
+	notifType := domain.TypeLightOff
+	title := "Luz desligada"
+	if isOn {
+		notifType = domain.TypeLightOn
+		title = "Luz ligada"
+	}
+	n := domain.NewNotification(
+		userID,
+		notifType,
+		title,
+		fmt.Sprintf("%s em %s (dispositivo: %s)", title, location, deviceID),
+		deviceID,
+		location,
+	)
+	if err := s.repo.Save(n); err != nil {
+		return err
+	}
+	if s.telegram != nil {
+		s.telegram.SendIfEnabled(context.Background(), userID, string(notifType), location)
+	}
+	return nil
+}
+
+// HandleScheduleExecuted processa evento de execucao de agendamento
+func (s *NotificationService) HandleScheduleExecuted(scheduleID, ownerID, actionType, scheduleName string) error {
+	log.Printf("[Notif] HandleScheduleExecuted scheduleID=%s ownerID=%s action=%s name=%s telegram=%v", scheduleID, ownerID, actionType, scheduleName, s.telegram != nil)
+	msg := fmt.Sprintf("Agendamento '%s' executado (ação: %s)", scheduleName, actionType)
+	if scheduleName == "" {
+		msg = fmt.Sprintf("Agendamento executado (ação: %s, id: %s)", actionType, scheduleID)
+	}
+	n := domain.NewNotification(
+		ownerID,
+		domain.TypeScheduleExecuted,
+		"Ação agendada executada",
+		msg,
+		scheduleID,
+		"",
+	)
+	if err := s.repo.Save(n); err != nil {
+		log.Printf("[Notif] Erro ao salvar notificacao de agendamento: %v", err)
+		return err
+	}
+	if s.telegram != nil {
+		s.telegram.SendIfEnabled(context.Background(), ownerID, string(domain.TypeScheduleExecuted), scheduleName)
+	} else {
+		log.Printf("[Notif] telegram service é nil, notificacao nao enviada")
+	}
+	return nil
+}
+
+// HandleAlarmTriggered processa evento de alarme acionado
+func (s *NotificationService) HandleAlarmTriggered(deviceID, userID, location string) error {
+	n := domain.NewNotification(
+		userID,
+		domain.TypeAlarmTriggered,
+		"Alarme acionado",
+		fmt.Sprintf("Alarme acionado em %s (dispositivo: %s)", location, deviceID),
+		deviceID,
+		location,
+	)
+	if err := s.repo.Save(n); err != nil {
+		return err
+	}
+	if s.telegram != nil {
+		s.telegram.SendIfEnabled(context.Background(), userID, string(domain.TypeAlarmTriggered), location)
+	}
+	return nil
 }

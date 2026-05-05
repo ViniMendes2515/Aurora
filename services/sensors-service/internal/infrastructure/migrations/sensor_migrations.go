@@ -76,13 +76,7 @@ func SeedDemoSensors(db *sql.DB) error {
 		return nil
 	}
 
-	// Buscar o primeiro usuário disponível para sensores comuns
-	var ownerID string
-	err = db.QueryRow("SELECT id FROM users LIMIT 1").Scan(&ownerID)
-	if err != nil {
-		log.Println("No users found, skipping sensor seeding. Register a user first.")
-		return nil
-	}
+	ownerID := "00000000-0000-0000-0000-000000000001"
 
 	sensors := []struct {
 		id       string
@@ -91,9 +85,9 @@ func SeedDemoSensors(db *sql.DB) error {
 		location string
 		ownerID  string
 	}{
-		// Sensores físicos do ESP32 (owner_id = * para acesso público)
-		{"esp32-pir-001", "PIR ESP32 - Sensor de Presença", "motion", "Sala IoT", "*"},
-		{"esp32-ldr-001", "LDR ESP32 - Sensor de Luminosidade", "light", "Sala IoT", "*"},
+		// Sensores físicos do ESP32
+		{"esp32-pir-001", "PIR ESP32 - Sensor de Presença", "motion", "Sala IoT", ownerID},
+		{"esp32-ldr-001", "LDR ESP32 - Sensor de Luminosidade", "light", "Sala IoT", ownerID},
 	}
 
 	query := `

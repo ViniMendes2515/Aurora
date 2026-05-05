@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+	_ "time/tzdata"
 
 	"aurora/pkg/database"
 	"aurora/services/schedule-service/internal/application"

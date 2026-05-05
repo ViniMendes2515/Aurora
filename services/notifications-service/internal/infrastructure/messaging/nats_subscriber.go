@@ -10,7 +10,6 @@ import (
 	"aurora/services/notifications-service/internal/application"
 )
 
-// motionEvent representa o payload publicado em sensors.motion.detected
 type motionEvent struct {
 	ID         string    `json:"id"`
 	SensorID   string    `json:"sensor_id"`
@@ -19,13 +18,39 @@ type motionEvent struct {
 	DetectedAt time.Time `json:"detected_at"`
 }
 
-// lightEvent representa o payload publicado em sensors.light.changed
-type lightEvent struct {
+type lightSensorEvent struct {
 	ID         string    `json:"id"`
 	SensorID   string    `json:"sensor_id"`
 	Value      float64   `json:"value"`
 	Raw        int       `json:"raw"`
 	RecordedAt time.Time `json:"recorded_at"`
+}
+
+type lightStateEvent struct {
+	LightID   string    `json:"light_id"`
+	UserID    string    `json:"user_id"`
+	Name      string    `json:"name"`
+	Location  string    `json:"location"`
+	State     string    `json:"state"`
+	ChangedAt time.Time `json:"changed_at"`
+}
+
+type alarmTriggeredEvent struct {
+	AlarmID     string    `json:"alarm_id"`
+	UserID      string    `json:"user_id"`
+	TriggerType string    `json:"trigger_type"`
+	SensorID    string    `json:"sensor_id"`
+	Location    string    `json:"location"`
+	TriggeredAt time.Time `json:"triggered_at"`
+}
+
+type scheduleExecutedEvent struct {
+	ScheduleID     string `json:"schedule_id"`
+	ScheduleName   string `json:"schedule_name"`
+	OwnerID        string `json:"owner_id"`
+	ActionType     string `json:"action_type"`
+	ActionDeviceID string `json:"action_device_id"`
+	ExecutedAt     string `json:"executed_at"`
 }
 
 // NATSSubscriber gerencia as subscricoes NATS do notifications-service
@@ -34,11 +59,9 @@ type NATSSubscriber struct {
 	service *application.NotificationService
 }
 
-// NewNATSSubscriber cria e conecta o subscriber ao servidor NATS com retry automatico
 func NewNATSSubscriber(natsURL string, service *application.NotificationService) (*NATSSubscriber, error) {
 	var nc *nats.Conn
 	var err error
-
 	for i := 0; i < 10; i++ {
 		nc, err = nats.Connect(natsURL)
 		if err == nil {
@@ -50,22 +73,27 @@ func NewNATSSubscriber(natsURL string, service *application.NotificationService)
 	if err != nil {
 		return nil, err
 	}
-
 	return &NATSSubscriber{conn: nc, service: service}, nil
 }
 
-// Subscribe registra as subscricoes nos topicos de eventos dos sensores
 func (s *NATSSubscriber) Subscribe() error {
-	if _, err := s.conn.Subscribe("sensors.motion.detected", s.handleMotion); err != nil {
-		return err
+	subs := []struct {
+		subject string
+		handler nats.MsgHandler
+	}{
+		{"sensors.motion.detected", s.handleMotion},
+		{"sensors.light.changed", s.handleLightSensor},
+		{"lighting.state.changed", s.handleLightState},
+		{"security.alarm.triggered", s.handleAlarm},
+		{"schedule.executed", s.handleScheduleExecuted},
 	}
-	log.Println("[NATS] Subscrito em sensors.motion.detected")
 
-	if _, err := s.conn.Subscribe("sensors.light.changed", s.handleLight); err != nil {
-		return err
+	for _, sub := range subs {
+		if _, err := s.conn.Subscribe(sub.subject, sub.handler); err != nil {
+			return err
+		}
+		log.Printf("[NATS] Subscrito em %s", sub.subject)
 	}
-	log.Println("[NATS] Subscrito em sensors.light.changed")
-
 	return nil
 }
 
@@ -76,22 +104,56 @@ func (s *NATSSubscriber) handleMotion(msg *nats.Msg) {
 		return
 	}
 	if err := s.service.HandleMotionDetected(e.SensorID, e.UserID, e.Location); err != nil {
-		log.Printf("[NATS] Erro ao salvar notificacao de movimento: %v", err)
+		log.Printf("[NATS] Erro ao processar notificacao de movimento: %v", err)
 	}
 }
 
-func (s *NATSSubscriber) handleLight(msg *nats.Msg) {
-	var e lightEvent
+func (s *NATSSubscriber) handleLightSensor(msg *nats.Msg) {
+	var e lightSensorEvent
 	if err := json.Unmarshal(msg.Data, &e); err != nil {
 		log.Printf("[NATS] Erro ao parsear sensors.light.changed: %v", err)
 		return
 	}
 	if err := s.service.HandleLightLow(e.SensorID, e.Value); err != nil {
-		log.Printf("[NATS] Erro ao salvar notificacao de luz baixa: %v", err)
+		log.Printf("[NATS] Erro ao processar notificacao de luz baixa: %v", err)
 	}
 }
 
-// Close fecha a conexao NATS de forma limpa
+func (s *NATSSubscriber) handleLightState(msg *nats.Msg) {
+	var e lightStateEvent
+	if err := json.Unmarshal(msg.Data, &e); err != nil {
+		log.Printf("[NATS] Erro ao parsear lighting.state.changed: %v", err)
+		return
+	}
+	isOn := e.State == "on"
+	if err := s.service.HandleLightChanged(e.LightID, e.UserID, e.Location, isOn); err != nil {
+		log.Printf("[NATS] Erro ao processar notificacao de luz: %v", err)
+	}
+}
+
+func (s *NATSSubscriber) handleAlarm(msg *nats.Msg) {
+	var e alarmTriggeredEvent
+	if err := json.Unmarshal(msg.Data, &e); err != nil {
+		log.Printf("[NATS] Erro ao parsear security.alarm.triggered: %v", err)
+		return
+	}
+	if err := s.service.HandleAlarmTriggered(e.SensorID, e.UserID, e.Location); err != nil {
+		log.Printf("[NATS] Erro ao processar notificacao de alarme: %v", err)
+	}
+}
+
+func (s *NATSSubscriber) handleScheduleExecuted(msg *nats.Msg) {
+	log.Printf("[NATS] schedule.executed recebido: %s", string(msg.Data))
+	var e scheduleExecutedEvent
+	if err := json.Unmarshal(msg.Data, &e); err != nil {
+		log.Printf("[NATS] Erro ao parsear schedule.executed: %v", err)
+		return
+	}
+	if err := s.service.HandleScheduleExecuted(e.ScheduleID, e.OwnerID, e.ActionType, e.ScheduleName); err != nil {
+		log.Printf("[NATS] Erro ao processar notificacao de agendamento: %v", err)
+	}
+}
+
 func (s *NATSSubscriber) Close() {
 	s.conn.Close()
 }

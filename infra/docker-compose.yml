@@ -34,6 +34,7 @@ services:
       dockerfile: services/auth-service/Dockerfile
     container_name: aurora-auth-service
     environment:
+      - TZ=America/Sao_Paulo
       - JWT_SECRET=${JWT_SECRET}
       - SERVER_PORT=8080
       - DB_HOST=postgres
@@ -54,6 +55,7 @@ services:
       dockerfile: services/sensors-service/Dockerfile
     container_name: aurora-sensors-service
     environment:
+      - TZ=America/Sao_Paulo
       - JWT_SECRET=${JWT_SECRET}
       - SERVER_PORT=8081
       - NATS_URL=nats://nats:4222
@@ -80,8 +82,10 @@ services:
       dockerfile: services/lighting-service/Dockerfile
     container_name: aurora-lighting-service
     environment:
+      - TZ=America/Sao_Paulo
       - JWT_SECRET=${JWT_SECRET}
       - SERVER_PORT=8082
+      - NATS_URL=nats://nats:4222
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=aurora
@@ -102,6 +106,7 @@ services:
       dockerfile: services/security-service/Dockerfile
     container_name: aurora-security-service
     environment:
+      - TZ=America/Sao_Paulo
       - JWT_SECRET=${JWT_SECRET}
       - SERVER_PORT=8083
       - NATS_URL=nats://nats:4222
@@ -129,6 +134,7 @@ services:
       dockerfile: services/rules-service/Dockerfile
     container_name: aurora-rules-service
     environment:
+      - TZ=America/Sao_Paulo
       - JWT_SECRET=${JWT_SECRET}
       - SERVER_PORT=8084
       - NATS_URL=nats://nats:4222
@@ -160,6 +166,7 @@ services:
       dockerfile: services/notifications-service/Dockerfile
     container_name: aurora-notifications-service
     environment:
+      - TZ=America/Sao_Paulo
       - JWT_SECRET=${JWT_SECRET}
       - SERVER_PORT=8085
       - NATS_URL=nats://nats:4222
@@ -169,6 +176,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=aurora_home
       - DB_SSLMODE=disable
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
     depends_on:
       postgres:
         condition: service_healthy
@@ -185,6 +193,7 @@ services:
       dockerfile: services/schedule-service/Dockerfile
     container_name: aurora-schedule-service
     environment:
+      - TZ=America/Sao_Paulo
       - JWT_SECRET=${JWT_SECRET}
       - SERVER_PORT=8086
       - NATS_URL=nats://nats:4222
@@ -199,6 +208,12 @@ services:
       - SECURITY_SERVICE_URL=http://security-service:8083
       - MISSED_EXECUTION_GRACE_SECONDS=300
       - DISPATCH_TIMEOUT_SECONDS=30
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8086/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     depends_on:
       postgres:
         condition: service_healthy

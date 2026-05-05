@@ -19,11 +19,11 @@ type Server struct {
 }
 
 // NewServer cria e configura um novo servidor HTTP
-func NewServer(service *application.NotificationService, jwtValidator *security.JWTValidator, port string, debug bool) *Server {
+func NewServer(service *application.NotificationService, telegramService *application.TelegramService, jwtValidator *security.JWTValidator, port string, debug bool) *Server {
 	router := gin.New()
 	router.Use(gin.Logger(), gin.Recovery())
 
-	RegisterRoutes(router, service, jwtValidator)
+	RegisterRoutes(router, service, telegramService, jwtValidator)
 
 	if debug {
 		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

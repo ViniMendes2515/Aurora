@@ -12,10 +12,10 @@ import (
 
 // mockSensorRepoMotion é um repositório de sensores falso para testes do MotionService
 type mockSensorRepoMotion struct {
-	sensor          *domain.Sensor
-	findByIDErr     error
-	saveMotionErr   error
-	savedMotionRec  *domain.MotionRecord
+	sensor         *domain.Sensor
+	findByIDErr    error
+	saveMotionErr  error
+	savedMotionRec *domain.MotionRecord
 }
 
 func (m *mockSensorRepoMotion) FindByID(id string) (*domain.Sensor, error) {
@@ -53,8 +53,8 @@ func (m *mockSensorRepoMotion) GetLightRecords(sensorID string, limit int) ([]*d
 
 // mockEventPublisherMotion é um publicador de eventos falso para testes do MotionService
 type mockEventPublisherMotion struct {
-	publishMotionErr    error
-	publishedMotionEvt  *domain.MotionDetectedEvent
+	publishMotionErr   error
+	publishedMotionEvt *domain.MotionDetectedEvent
 }
 
 func (m *mockEventPublisherMotion) PublishMotionEvent(event *domain.MotionDetectedEvent) error {
@@ -171,12 +171,12 @@ func TestRegisterDeviceMotion_Sucesso(t *testing.T) {
 	if resp.EventID == "" {
 		t.Error("EventID não deveria estar vazio após registro bem-sucedido")
 	}
-	// Verifica que o userID usado foi "device"
+	// Verifica que o userID usado foi o owner do sensor
 	if repo.savedMotionRec == nil {
 		t.Fatal("registro de movimento deveria ter sido salvo no repositório")
 	}
-	if repo.savedMotionRec.UserID != "device" {
-		t.Errorf("esperava UserID 'device', mas recebeu: %s", repo.savedMotionRec.UserID)
+	if repo.savedMotionRec.UserID != "usuario-99" {
+		t.Errorf("esperava UserID 'usuario-99', mas recebeu: %s", repo.savedMotionRec.UserID)
 	}
 }
 

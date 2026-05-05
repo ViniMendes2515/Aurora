@@ -8,8 +8,9 @@ import (
 )
 
 // RegisterRoutes registra todas as rotas do notifications-service no router Gin
-func RegisterRoutes(router *gin.Engine, service *application.NotificationService, jwtValidator *security.JWTValidator) {
+func RegisterRoutes(router *gin.Engine, service *application.NotificationService, telegramService *application.TelegramService, jwtValidator *security.JWTValidator) {
 	handler := NewHandler(service)
+	telegramHandler := NewTelegramHandler(telegramService)
 	auth := NewAuthMiddleware(jwtValidator)
 
 	router.GET("/health", handler.Health)
@@ -19,5 +20,10 @@ func RegisterRoutes(router *gin.Engine, service *application.NotificationService
 	{
 		protected.GET("/notifications", handler.GetNotifications)
 		protected.PUT("/notifications/:id/read", handler.MarkAsRead)
+
+		protected.POST("/telegram/link", telegramHandler.GenerateLinkToken)
+		protected.DELETE("/telegram/link", telegramHandler.UnlinkTelegram)
+		protected.GET("/telegram/preferences", telegramHandler.GetTelegramPreferences)
+		protected.PUT("/telegram/preferences", telegramHandler.UpdateTelegramPreferences)
 	}
 }

@@ -66,9 +66,9 @@ func (m *mockBuzzerClient) TurnOff(deviceID string) error {
 func TestTriggerAlarm_TipoInvalido(t *testing.T) {
 	repo := &mockAlarmRepo{}
 	buzzer := &mockBuzzerClient{}
-	svc := application.NewAlarmService(repo, buzzer, 100, "device-1")
+	svc := application.NewAlarmService(repo, buzzer, 100, "device-1", nil)
 
-	resp, err := svc.TriggerAlarm("unknown", "sensor-1", "sala")
+	resp, err := svc.TriggerAlarm("user-1", "unknown", "sensor-1", "sala")
 
 	if err == nil {
 		t.Fatal("esperava erro para tipo de gatilho inválido, mas não recebeu nenhum")
@@ -88,9 +88,9 @@ func TestTriggerAlarm_Sucesso(t *testing.T) {
 	repo := &mockAlarmRepo{}
 	buzzer := &mockBuzzerClient{}
 	// Duração longa para que o buzzer não interfira neste teste
-	svc := application.NewAlarmService(repo, buzzer, 10000, "device-1")
+	svc := application.NewAlarmService(repo, buzzer, 10000, "device-1", nil)
 
-	resp, err := svc.TriggerAlarm("motion", "sensor-42", "corredor")
+	resp, err := svc.TriggerAlarm("user-1", "motion", "sensor-42", "corredor")
 
 	if err != nil {
 		t.Fatalf("não esperava erro, mas recebeu: %v", err)
@@ -126,9 +126,9 @@ func TestTriggerAlarm_BuzzerEAcionadoEmBackground(t *testing.T) {
 	repo := &mockAlarmRepo{}
 	buzzer := &mockBuzzerClient{}
 	// Duração curta para que a goroutine complete dentro do tempo de espera do teste
-	svc := application.NewAlarmService(repo, buzzer, 10, "device-1")
+	svc := application.NewAlarmService(repo, buzzer, 10, "device-1", nil)
 
-	_, err := svc.TriggerAlarm("manual", "sensor-1", "entrada")
+	_, err := svc.TriggerAlarm("user-1", "manual", "sensor-1", "entrada")
 	if err != nil {
 		t.Fatalf("não esperava erro: %v", err)
 	}
@@ -153,7 +153,7 @@ func TestSilenceAlarm_NaoEncontrado(t *testing.T) {
 		findErr: errors.New("qualquer erro de busca"),
 	}
 	buzzer := &mockBuzzerClient{}
-	svc := application.NewAlarmService(repo, buzzer, 100, "device-1")
+	svc := application.NewAlarmService(repo, buzzer, 100, "device-1", nil)
 
 	resp, err := svc.SilenceAlarm("id-inexistente")
 
@@ -169,7 +169,7 @@ func TestSilenceAlarm_NaoEncontrado(t *testing.T) {
 // o estado atualizado, desliga o buzzer e retorna status "silenced".
 // Esse fluxo é crítico para o controle operacional do sistema de segurança.
 func TestSilenceAlarm_Sucesso(t *testing.T) {
-	existing, err := domain.NewAlarmEvent("motion", "sensor-10", "garagem")
+	existing, err := domain.NewAlarmEvent("user-1", "motion", "sensor-10", "garagem")
 	if err != nil {
 		t.Fatalf("falha ao criar evento de domínio para o teste: %v", err)
 	}
@@ -178,7 +178,7 @@ func TestSilenceAlarm_Sucesso(t *testing.T) {
 		findEvent: existing,
 	}
 	buzzer := &mockBuzzerClient{}
-	svc := application.NewAlarmService(repo, buzzer, 100, "device-1")
+	svc := application.NewAlarmService(repo, buzzer, 100, "device-1", nil)
 
 	resp, err := svc.SilenceAlarm(existing.ID)
 
@@ -204,14 +204,14 @@ func TestSilenceAlarm_Sucesso(t *testing.T) {
 // múltiplos eventos do repositório em respostas da camada de aplicação.
 // Garante que a transformação de domínio → DTO não descarta nem duplica itens.
 func TestGetRecentAlarms_RetornaLista(t *testing.T) {
-	ev1, _ := domain.NewAlarmEvent("motion", "sensor-1", "sala")
-	ev2, _ := domain.NewAlarmEvent("manual", "sensor-2", "cozinha")
+	ev1, _ := domain.NewAlarmEvent("user-1", "motion", "sensor-1", "sala")
+	ev2, _ := domain.NewAlarmEvent("user-1", "manual", "sensor-2", "cozinha")
 
 	repo := &mockAlarmRepo{
 		recentEvents: []*domain.AlarmEvent{ev1, ev2},
 	}
 	buzzer := &mockBuzzerClient{}
-	svc := application.NewAlarmService(repo, buzzer, 100, "device-1")
+	svc := application.NewAlarmService(repo, buzzer, 100, "device-1", nil)
 
 	responses, err := svc.GetRecentAlarms(10)
 
