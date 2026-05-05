@@ -62,6 +62,8 @@ func SeedDemoLights(db *sql.DB) error {
 		return nil
 	}
 
+	ownerID := "00000000-0000-0000-0000-000000000001"
+
 	lights := []struct {
 		id       string
 		name     string
@@ -69,9 +71,10 @@ func SeedDemoLights(db *sql.DB) error {
 		ownerID  string
 		deviceID string
 	}{
-		{"light-001", "Luz da Sala", "Sala de Estar", "*", "esp32-main:1"},
-		{"light-002", "Luz do Corredor", "Corredor", "*", "esp32-main:2"},
-		{"light-003", "Luz da Garagem", "Garagem", "*", "esp32-main:3"},
+		{"light-001", "Luz da Sala", "Sala de Estar", ownerID, "esp32-main:1"},
+		{"light-002", "Luz do Corredor", "Corredor", ownerID, "esp32-main:2"},
+		{"light-003", "Luz da Garagem", "Garagem", ownerID, "esp32-main:3"},
+		{"light-004", "Luz da Cozinha", "Cozinha", ownerID, "esp32-main:4"},
 	}
 
 	query := `

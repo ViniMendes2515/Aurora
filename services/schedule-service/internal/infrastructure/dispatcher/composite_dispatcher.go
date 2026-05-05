@@ -24,18 +24,28 @@ func NewCompositeDispatcher(natsDispatcher, httpDispatcher domain.ActionDispatch
 }
 
 // Dispatch routes the schedule to the appropriate dispatcher based on the
-// action target. For NATS targets, it falls back to HTTP if NATS fails.
+// action target. After a successful dispatch, publishes a schedule.executed event via NATS.
 func (d *CompositeDispatcher) Dispatch(ctx context.Context, schedule *domain.Schedule) error {
+	var err error
 	switch schedule.Action.Target {
 	case domain.ActionTargetNATS:
 		// Temporariamente tratamos ações com target NATS como comandos HTTP.
 		log.Printf("[Scheduler] Action target nats recebido para schedule %s; executando via HTTP", schedule.ID)
-		return d.httpDispatcher.Dispatch(ctx, schedule)
-
+		err = d.httpDispatcher.Dispatch(ctx, schedule)
 	case domain.ActionTargetHTTP:
-		return d.httpDispatcher.Dispatch(ctx, schedule)
-
+		err = d.httpDispatcher.Dispatch(ctx, schedule)
 	default:
 		return domain.ErrInvalidAction
 	}
+
+	if err != nil {
+		return err
+	}
+
+	if pubErr := d.natsDispatcher.Dispatch(ctx, schedule); pubErr != nil {
+		log.Printf("[Scheduler] Falha ao publicar schedule.executed para schedule %s: %v", schedule.ID, pubErr)
+	} else {
+		log.Printf("[Scheduler] schedule.executed publicado para schedule %s", schedule.ID)
+	}
+	return nil
 }

@@ -51,7 +51,7 @@ func (m *mockNotificationRepo) MarkAsRead(id string) error {
 func TestGetByUserID_DelegaAoRepositorio(t *testing.T) {
 	notif := &domain.Notification{ID: "n1", UserID: "user1"}
 	repo := &mockNotificationRepo{findNotification: notif}
-	svc := application.NewNotificationService(repo)
+	svc := application.NewNotificationService(repo, nil)
 
 	resultado, err := svc.GetByUserID("user1")
 	if err != nil {
@@ -66,7 +66,7 @@ func TestGetByUserID_DelegaAoRepositorio(t *testing.T) {
 func TestMarkAsRead_AcessoNegado(t *testing.T) {
 	notif := &domain.Notification{ID: "n1", UserID: "user1"}
 	repo := &mockNotificationRepo{findNotification: notif}
-	svc := application.NewNotificationService(repo)
+	svc := application.NewNotificationService(repo, nil)
 
 	err := svc.MarkAsRead("n1", "user2")
 	if err != domain.ErrAccessDenied {
@@ -81,7 +81,7 @@ func TestMarkAsRead_AcessoNegado(t *testing.T) {
 func TestMarkAsRead_BroadcastPodeSerMarcadoPorQualquer(t *testing.T) {
 	notif := &domain.Notification{ID: "n2", UserID: "*"}
 	repo := &mockNotificationRepo{findNotification: notif}
-	svc := application.NewNotificationService(repo)
+	svc := application.NewNotificationService(repo, nil)
 
 	err := svc.MarkAsRead("n2", "qualquer-usuario")
 	if err != nil {
@@ -96,7 +96,7 @@ func TestMarkAsRead_BroadcastPodeSerMarcadoPorQualquer(t *testing.T) {
 func TestMarkAsRead_Sucesso(t *testing.T) {
 	notif := &domain.Notification{ID: "n3", UserID: "user1"}
 	repo := &mockNotificationRepo{findNotification: notif}
-	svc := application.NewNotificationService(repo)
+	svc := application.NewNotificationService(repo, nil)
 
 	err := svc.MarkAsRead("n3", "user1")
 	if err != nil {
@@ -110,7 +110,7 @@ func TestMarkAsRead_Sucesso(t *testing.T) {
 // TestHandleMotionDetected_CriaNotificacao verifica que o evento de movimento resulta em exatamente uma notificação persistida com o tipo correto.
 func TestHandleMotionDetected_CriaNotificacao(t *testing.T) {
 	repo := &mockNotificationRepo{}
-	svc := application.NewNotificationService(repo)
+	svc := application.NewNotificationService(repo, nil)
 
 	err := svc.HandleMotionDetected("sensor-01", "user1", "Sala")
 	if err != nil {
@@ -133,7 +133,7 @@ func TestHandleMotionDetected_CriaNotificacao(t *testing.T) {
 // TestHandleLightLow_AbaixoDoLimiar_CriaNotificacao confirma que valores de luminosidade abaixo de 30% geram uma notificação broadcast, alertando todos os usuários sobre a condição de luz baixa no ambiente.
 func TestHandleLightLow_AbaixoDoLimiar_CriaNotificacao(t *testing.T) {
 	repo := &mockNotificationRepo{}
-	svc := application.NewNotificationService(repo)
+	svc := application.NewNotificationService(repo, nil)
 
 	err := svc.HandleLightLow("sensor-02", 10.0)
 	if err != nil {
@@ -153,7 +153,7 @@ func TestHandleLightLow_AbaixoDoLimiar_CriaNotificacao(t *testing.T) {
 // TestHandleLightLow_AcimaDoLimiar_NaoCria garante que leituras normais (>= 30%) não gerem notificações desnecessárias, evitando ruído para os usuários.
 func TestHandleLightLow_AcimaDoLimiar_NaoCria(t *testing.T) {
 	repo := &mockNotificationRepo{}
-	svc := application.NewNotificationService(repo)
+	svc := application.NewNotificationService(repo, nil)
 
 	err := svc.HandleLightLow("sensor-03", 50.0)
 	if err != nil {
@@ -167,7 +167,7 @@ func TestHandleLightLow_AcimaDoLimiar_NaoCria(t *testing.T) {
 // TestHandleLightLow_Cooldown_NaoCriaDuplicata protege contra spam de notificações causado por leituras contínuas do ESP32
 func TestHandleLightLow_Cooldown_NaoCriaDuplicata(t *testing.T) {
 	repo := &mockNotificationRepo{}
-	svc := application.NewNotificationService(repo)
+	svc := application.NewNotificationService(repo, nil)
 
 	// Primeira chamada: deve criar a notificação normalmente
 	err := svc.HandleLightLow("sensor-04", 10.0)

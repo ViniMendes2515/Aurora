@@ -62,7 +62,7 @@ func (s *NATSSubscriber) Subscribe() error {
 
 		log.Printf("[NATS] Motion detected at %s (sensor: %s) — triggering alarm", event.Location, event.SensorID)
 
-		if _, err := s.alarmService.TriggerAlarm("motion", event.SensorID, event.Location); err != nil {
+		if _, err := s.alarmService.TriggerAlarm(event.UserID, "motion", event.SensorID, event.Location); err != nil {
 			log.Printf("[NATS] Failed to trigger alarm: %v", err)
 		}
 	})

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
+	"os/signal"
 
 	"aurora/pkg/database"
 	"aurora/services/notifications-service/internal/application"
@@ -11,6 +13,7 @@ import (
 	"aurora/services/notifications-service/internal/infrastructure/migrations"
 	"aurora/services/notifications-service/internal/infrastructure/repository"
 	"aurora/services/notifications-service/internal/infrastructure/security"
+	"aurora/services/notifications-service/internal/infrastructure/telegram"
 
 	_ "aurora/services/notifications-service/docs"
 )
@@ -23,9 +26,13 @@ import (
 // @BasePath  /
 
 func main() {
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+
 	jwtSecret := getEnv("JWT_SECRET", "")
 	serverPort := getEnv("SERVER_PORT", "8085")
 	natsURL := getEnv("NATS_URL", "nats://localhost:4222")
+	telegramToken := getEnv("TELEGRAM_BOT_TOKEN", "")
 
 	dbConfig := database.Config{
 		Host:     getEnv("DB_HOST", "localhost"),
@@ -47,8 +54,26 @@ func main() {
 	}
 
 	notifRepo := repository.NewPostgresNotificationRepository(db)
-	notifService := application.NewNotificationService(notifRepo)
+	telegramRepo := repository.NewPostgresTelegramPreferenceRepository(db)
 	jwtValidator := security.NewJWTValidator(jwtSecret)
+
+	// Inicializa TelegramService primeiro, depois injeta o bot (quebra dependencia circular)
+	telegramSvc := application.NewTelegramService(telegramRepo)
+
+	if telegramToken != "" {
+		bot, err := telegram.NewBot(telegramToken, telegramSvc)
+		if err != nil {
+			log.Printf("Aviso: falha ao iniciar Telegram bot: %v", err)
+		} else {
+			telegramSvc.SetBot(bot)
+			go bot.Start(ctx)
+			log.Println("Telegram bot iniciado com sucesso")
+		}
+	} else {
+		log.Println("TELEGRAM_BOT_TOKEN nao configurado — notificacoes Telegram desabilitadas")
+	}
+
+	notifService := application.NewNotificationService(notifRepo, telegramSvc)
 
 	subscriber, err := messaging.NewNATSSubscriber(natsURL, notifService)
 	if err != nil {
@@ -61,7 +86,7 @@ func main() {
 	}
 
 	debug := os.Getenv("DEBUG") == "true"
-	server := httpserver.NewServer(notifService, jwtValidator, serverPort, debug)
+	server := httpserver.NewServer(notifService, telegramSvc, jwtValidator, serverPort, debug)
 	log.Printf("Notifications Service iniciando na porta %s...", serverPort)
 	if err := server.Start(); err != nil {
 		log.Fatalf("Falha ao iniciar servidor: %v", err)

@@ -66,7 +66,10 @@ func (h *Handlers) TriggerAlarm(c *gin.Context) {
 		sensorID = "manual"
 	}
 
-	response, err := h.alarmService.TriggerAlarm(triggerType, sensorID, body.Location)
+	userID, _ := c.Get("userID")
+	userIDStr, _ := userID.(string)
+
+	response, err := h.alarmService.TriggerAlarm(userIDStr, triggerType, sensorID, body.Location)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to trigger alarm"})
 		return

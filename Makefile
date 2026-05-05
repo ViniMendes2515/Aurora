@@ -43,10 +43,10 @@ up:
 	$(COMPOSE) up -d
 
 up-build:
-	$(COMPOSE) up -d --build
+	DOCKER_BUILDKIT=1 $(COMPOSE) up -d --build
 
 debug:
-	$(COMPOSE_DEBUG) up -d --build
+	DOCKER_BUILDKIT=1 $(COMPOSE_DEBUG) up -d --build
 
 down:
 	$(COMPOSE) down

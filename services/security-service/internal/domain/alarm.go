@@ -21,6 +21,7 @@ const (
 // AlarmEvent representa um evento de acionamento de alarme
 type AlarmEvent struct {
 	ID          string
+	UserID      string
 	TriggerType AlarmTriggerType
 	SensorID    string
 	Location    string
@@ -30,7 +31,7 @@ type AlarmEvent struct {
 }
 
 // NewAlarmEvent cria um novo evento de alarme. Retorna erro se triggerType for inválido.
-func NewAlarmEvent(triggerType, sensorID, location string) (*AlarmEvent, error) {
+func NewAlarmEvent(userID, triggerType, sensorID, location string) (*AlarmEvent, error) {
 	tt, err := NewAlarmTriggerType(triggerType)
 
 	if err != nil {
@@ -39,6 +40,7 @@ func NewAlarmEvent(triggerType, sensorID, location string) (*AlarmEvent, error) 
 
 	return &AlarmEvent{
 		ID:          newID(),
+		UserID:      userID,
 		TriggerType: tt,
 		SensorID:    sensorID,
 		Location:    location,

@@ -69,5 +69,11 @@ O `TriggerType = "schedule"` já existe no domínio mas nunca foi implementado. 
 | 2 | Value Objects (Email, ScheduleTime) | Alta | ~1h | ✅ feito |
 | 3 | Testes de Application layer | Alta | ~3h | feito |
 | 4 | Implementar TriggerSchedule | Alta | ~1 dia | feito |
-| 5 | Documentação / Swagger | Média | ~2h | pendente |
+| 5 | Documentação / Swagger | Média | ~2h | pendente | feito
 | 6 | Notificacao Telegram | Média | ~2h | pendente |
+
+(IMplementar notificacao do scheduler tbm, avisar que X acao foi executada)
+
+(mudar nome de sensor, deixar nome claro (pir etc))
+
+( no frontend, ao selecionar acionar alarme deve mudar automaticamente pro sensor, e se selecionar luz, muda automaticamente pro sensor de luz, nn deve escrever o sensor, nao e obrigacao do usuario escrever)

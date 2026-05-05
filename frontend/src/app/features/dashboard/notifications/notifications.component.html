@@ -1,79 +1,258 @@
-<div class="space-y-6">
+<div class="space-y-8">
+
   <!-- Header -->
   <div class="flex items-start justify-between flex-wrap gap-4">
     <div>
       <h1 style="font-family:'Yeseva One',serif; font-size:2rem; color:#a8c5d8; letter-spacing:0.03em;">Notificações</h1>
-      <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#5a8099; margin-top:0.25rem;">Histórico de alarmes e eventos de segurança</p>
-    </div>
-    <div class="flex gap-2">
-      <button (click)="triggerTestAlarm()" class="btn-danger">
-        <i class="pi pi-bell mr-2"></i>Testar Alarme
-      </button>
-      <button (click)="loadAlarms()" class="btn-primary">
-        <i class="pi pi-refresh mr-2"></i>Atualizar
-      </button>
+      <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#5a8099; margin-top:0.25rem;">Alertas e configurações de avisos</p>
     </div>
   </div>
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="flex justify-center py-12">
-    <i class="pi pi-spin pi-spinner text-3xl" style="color:#0F8C8C; opacity:0.7;"></i>
-  </div>
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- TELEGRAM                                                                -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="rounded-2xl p-6 space-y-5" style="background:rgba(10,37,53,0.7); border:1px solid #0d3348;">
 
-  <!-- Alarms list -->
-  <div *ngIf="!loading" class="space-y-3">
-    <div *ngFor="let alarm of alarms"
-         class="rounded-xl p-4 flex items-start justify-between transition-all"
-         [style.background]="alarm.status === 'triggered' ? 'rgba(30,15,15,0.8)' : 'rgba(10,37,53,0.7)'"
-         [style.border]="alarm.status === 'triggered' ? '1px solid rgba(239,68,68,0.2)' : '1px solid #0d3348'">
+    <!-- Título seção -->
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+           style="background:rgba(0,136,204,0.12); border:1px solid rgba(0,136,204,0.25);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#29b6f6">
+          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 14.059l-2.94-.918c-.64-.203-.651-.64.136-.954l11.49-4.43c.531-.194.997.131.838.914z"/>
+        </svg>
+      </div>
+      <div>
+        <h2 style="font-family:'Josefin Sans',sans-serif; font-size:0.9rem; font-weight:700; letter-spacing:0.06em; color:#a8c5d8;">Telegram</h2>
+        <p style="font-family:'Josefin Sans',sans-serif; font-size:0.65rem; color:#5a8099; letter-spacing:0.04em;">Receba alertas diretamente no seu Telegram</p>
+      </div>
+      <!-- Badge status -->
+      <div class="ml-auto">
+        <span *ngIf="telegramPref && telegramPref.active" class="px-2.5 py-1 rounded-full"
+              style="font-family:'Josefin Sans',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:rgba(34,197,94,0.1); color:#22c55e; border:1px solid rgba(34,197,94,0.2);">
+          Vinculado
+        </span>
+        <span *ngIf="!telegramPref && !loadingTelegram" class="px-2.5 py-1 rounded-full"
+              style="font-family:'Josefin Sans',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:rgba(90,128,153,0.1); color:#5a8099; border:1px solid #0d3348;">
+          Não vinculado
+        </span>
+      </div>
+    </div>
 
-      <div class="flex items-start gap-4">
-        <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-             [style.background]="alarm.status === 'triggered' ? 'rgba(239,68,68,0.12)' : 'rgba(1,28,38,0.5)'"
-             [style.border]="alarm.status === 'triggered' ? '1px solid rgba(239,68,68,0.22)' : '1px solid #0d3348'">
-          <i class="pi text-base"
-             [class]="alarm.status === 'triggered' ? 'pi-exclamation-triangle' : 'pi-check'"
-             [style.color]="alarm.status === 'triggered' ? '#ef4444' : '#3d6477'"></i>
+    <!-- Erro -->
+    <div *ngIf="telegramError" class="rounded-lg px-4 py-3"
+         style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2);">
+      <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#ef4444; letter-spacing:0.04em;">
+        <i class="pi pi-exclamation-triangle mr-1.5"></i>{{ telegramError }}
+      </p>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loadingTelegram" class="flex justify-center py-4">
+      <i class="pi pi-spin pi-spinner" style="color:#0F8C8C; opacity:0.7;"></i>
+    </div>
+
+    <!-- ── NÃO VINCULADO ─────────────────────────────────────────── -->
+    <ng-container *ngIf="!loadingTelegram && !telegramPref">
+
+      <div class="rounded-xl p-4 space-y-3" style="background:rgba(1,28,38,0.5); border:1px solid #0d3348;">
+        <p style="font-family:'Josefin Sans',sans-serif; font-size:0.75rem; color:#5a8099; letter-spacing:0.04em; line-height:1.6;">
+          Vincule sua conta para receber notificações de movimento, luz e alarmes diretamente no Telegram.
+        </p>
+
+        <!-- Passos -->
+        <ol class="space-y-2" style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#5a8099; letter-spacing:0.04em;">
+          <li class="flex items-start gap-2">
+            <span class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:rgba(15,140,140,0.15); color:#0F8C8C; border:1px solid rgba(15,140,140,0.25);">1</span>
+            Clique em <strong style="color:#a8c5d8;">"Gerar Token"</strong> abaixo
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:rgba(15,140,140,0.15); color:#0F8C8C; border:1px solid rgba(15,140,140,0.25);">2</span>
+            Clique em <strong style="color:#a8c5d8;">"Abrir bot no Telegram Web"</strong>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:rgba(15,140,140,0.15); color:#0F8C8C; border:1px solid rgba(15,140,140,0.25);">3</span>
+            Envie o comando copiado (válido por 15 minutos)
+          </li>
+        </ol>
+      </div>
+
+      <!-- Token gerado -->
+      <div *ngIf="linkToken" class="rounded-xl p-4 space-y-3" style="background:rgba(1,28,38,0.6); border:1px solid rgba(15,140,140,0.25);">
+        <p style="font-family:'Josefin Sans',sans-serif; font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#0F8C8C;">Token gerado — expira em 15 min</p>
+
+        <!-- Abrir bot via Telegram Web (sem tg://) -->
+        <a href="https://web.telegram.org/k/#@auroranoti_bot" target="_blank" rel="noopener noreferrer"
+           class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl transition-all"
+           style="font-family:'Josefin Sans',sans-serif; font-size:0.75rem; font-weight:700; letter-spacing:0.08em; text-decoration:none; background:rgba(0,136,204,0.15); color:#29b6f6; border:1px solid rgba(0,136,204,0.3);"
+           onmouseenter="this.style.background='rgba(0,136,204,0.25)'"
+           onmouseleave="this.style.background='rgba(0,136,204,0.15)'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 14.059l-2.94-.918c-.64-.203-.651-.64.136-.954l11.49-4.43c.531-.194.997.131.838.914z"/>
+          </svg>
+          Abrir bot no Telegram Web
+        </a>
+
+        <div class="flex items-center gap-2">
+          <code class="flex-1 px-3 py-2 rounded-lg text-sm" style="font-family:monospace; background:rgba(0,0,0,0.3); color:#5a8099; border:1px solid #0d3348; letter-spacing:0.08em;">
+            /start {{ linkToken }}
+          </code>
+          <button (click)="copyToken()"
+                  class="px-3 py-2 rounded-lg flex items-center gap-1.5 transition-all"
+                  style="font-family:'Josefin Sans',sans-serif; font-size:0.65rem; font-weight:700; letter-spacing:0.08em; background:rgba(15,140,140,0.1); color:#0F8C8C; border:1px solid rgba(15,140,140,0.25); cursor:pointer;"
+                  onmouseenter="this.style.background='rgba(15,140,140,0.2)'"
+                  onmouseleave="this.style.background='rgba(15,140,140,0.1)'">
+            <i class="pi pi-copy"></i>Copiar
+          </button>
         </div>
+      </div>
+
+      <button (click)="generateToken()" [disabled]="generatingToken"
+              class="w-full py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all"
+              style="font-family:'Josefin Sans',sans-serif; font-size:0.75rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:rgba(15,140,140,0.12); color:#0F8C8C; border:1px solid rgba(15,140,140,0.3); cursor:pointer;"
+              onmouseenter="this.style.background='rgba(15,140,140,0.22)'"
+              onmouseleave="this.style.background='rgba(15,140,140,0.12)'">
+        <i class="pi" [class]="generatingToken ? 'pi-spin pi-spinner' : 'pi-key'"></i>
+        {{ generatingToken ? 'Gerando...' : (linkToken ? 'Gerar novo token' : 'Gerar Token') }}
+      </button>
+    </ng-container>
+
+    <!-- ── VINCULADO ─────────────────────────────────────────────── -->
+    <ng-container *ngIf="!loadingTelegram && telegramPref">
+
+      <div class="rounded-xl p-4 flex items-center gap-3" style="background:rgba(34,197,94,0.05); border:1px solid rgba(34,197,94,0.15);">
+        <i class="pi pi-check-circle" style="color:#22c55e; font-size:1.2rem;"></i>
         <div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <h3 style="font-family:'Josefin Sans',sans-serif; font-size:0.875rem; font-weight:600; color:#a8c5d8; letter-spacing:0.03em;">
-              {{ alarm.trigger_type === 'motion' ? 'Movimento Detectado' : 'Alarme Manual' }}
-            </h3>
-            <span class="px-2 py-0.5 rounded-full"
-                  style="font-family:'Josefin Sans',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;"
-                  [style.background]="alarm.status === 'triggered' ? 'rgba(239,68,68,0.1)' : 'rgba(1,28,38,0.5)'"
-                  [style.color]="alarm.status === 'triggered' ? '#ef4444' : '#3d6477'"
-                  [style.border]="alarm.status === 'triggered' ? '1px solid rgba(239,68,68,0.2)' : '1px solid #0d3348'">
-              {{ alarm.status === 'triggered' ? 'Ativo' : 'Silenciado' }}
-            </span>
-          </div>
-          <p class="flex items-center gap-1.5 mt-1"
-             style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#5a8099; letter-spacing:0.04em;">
-            <i class="pi pi-map-marker text-xs"></i>{{ alarm.location || 'Local não especificado' }}
-          </p>
-          <p style="font-family:'Josefin Sans',sans-serif; font-size:0.65rem; color:#3d6477; letter-spacing:0.04em; margin-top:0.25rem;">
-            {{ alarm.triggered_at | date:'dd/MM/yyyy HH:mm:ss' }}
+          <p style="font-family:'Josefin Sans',sans-serif; font-size:0.75rem; font-weight:600; color:#a8c5d8; letter-spacing:0.04em;">Conta vinculada com sucesso</p>
+          <p style="font-family:'Josefin Sans',sans-serif; font-size:0.65rem; color:#5a8099; letter-spacing:0.04em; margin-top:0.2rem;">
+            Vinculado em {{ telegramPref.linked_at | date:'dd/MM/yyyy HH:mm' }}
           </p>
         </div>
       </div>
 
-      <button *ngIf="alarm.status === 'triggered'"
-              (click)="silenceAlarm(alarm)"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap flex-shrink-0 transition-all"
-              style="font-family:'Josefin Sans',sans-serif; font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:rgba(1,28,38,0.6); color:#5a8099; border:1px solid #0d3348; cursor:pointer;"
-              onmouseenter="this.style.background='rgba(1,28,38,0.9)'; this.style.borderColor='#1a4a62'; this.style.color='#a8c5d8'"
-              onmouseleave="this.style.background='rgba(1,28,38,0.6)'; this.style.borderColor='#0d3348'; this.style.color='#5a8099'">
-        <i class="pi pi-volume-off"></i>Silenciar
-      </button>
+      <!-- Preferências de tipos -->
+      <div class="space-y-3">
+        <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#5a8099;">Alertas habilitados</p>
+
+        <div class="grid grid-cols-1 gap-2" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));">
+          <label *ngFor="let type of allTypes"
+                 class="flex items-center gap-3 rounded-xl px-4 py-3 cursor-pointer transition-all"
+                 [style.background]="isTypeSelected(type.value) ? 'rgba(15,140,140,0.1)' : 'rgba(1,28,38,0.5)'"
+                 [style.border]="isTypeSelected(type.value) ? '1px solid rgba(15,140,140,0.3)' : '1px solid #0d3348'">
+            <input type="checkbox" class="hidden"
+                   [checked]="isTypeSelected(type.value)"
+                   (change)="toggleType(type.value)">
+            <div class="w-4 h-4 rounded flex items-center justify-center flex-shrink-0"
+                 [style.background]="isTypeSelected(type.value) ? '#0F8C8C' : 'transparent'"
+                 [style.border]="isTypeSelected(type.value) ? '1px solid #0F8C8C' : '1px solid #1a4a62'">
+              <i *ngIf="isTypeSelected(type.value)" class="pi pi-check" style="color:white; font-size:0.55rem;"></i>
+            </div>
+            <span style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; font-weight:600; letter-spacing:0.04em;"
+                  [style.color]="isTypeSelected(type.value) ? '#a8c5d8' : '#5a8099'">
+              {{ type.label }}
+            </span>
+          </label>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button (click)="savePreferences()" [disabled]="savingPrefs"
+                  class="flex-1 py-2 rounded-xl flex items-center justify-center gap-2 transition-all"
+                  style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:rgba(15,140,140,0.12); color:#0F8C8C; border:1px solid rgba(15,140,140,0.3); cursor:pointer;"
+                  onmouseenter="this.style.background='rgba(15,140,140,0.22)'"
+                  onmouseleave="this.style.background='rgba(15,140,140,0.12)'">
+            <i class="pi" [class]="savingPrefs ? 'pi-spin pi-spinner' : (prefsSaved ? 'pi-check' : 'pi-save')"></i>
+            {{ savingPrefs ? 'Salvando...' : (prefsSaved ? 'Salvo!' : 'Salvar preferências') }}
+          </button>
+
+          <button (click)="unlinkTelegram()" [disabled]="unlinking"
+                  class="px-4 py-2 rounded-xl flex items-center gap-2 transition-all"
+                  style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:rgba(239,68,68,0.08); color:#ef4444; border:1px solid rgba(239,68,68,0.2); cursor:pointer;"
+                  onmouseenter="this.style.background='rgba(239,68,68,0.15)'"
+                  onmouseleave="this.style.background='rgba(239,68,68,0.08)'">
+            <i class="pi" [class]="unlinking ? 'pi-spin pi-spinner' : 'pi-times'"></i>
+            Desvincular
+          </button>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- ALARMES                                                                 -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="space-y-4">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <h2 style="font-family:'Josefin Sans',sans-serif; font-size:0.9rem; font-weight:700; letter-spacing:0.06em; color:#a8c5d8;">Histórico de Alarmes</h2>
+        <p style="font-family:'Josefin Sans',sans-serif; font-size:0.65rem; color:#5a8099; letter-spacing:0.04em; margin-top:0.15rem;">Eventos de segurança registrados</p>
+      </div>
+      <div class="flex gap-2">
+        <button (click)="triggerTestAlarm()" class="btn-danger">
+          <i class="pi pi-bell mr-2"></i>Testar Alarme
+        </button>
+        <button (click)="loadAlarms()" class="btn-primary">
+          <i class="pi pi-refresh mr-2"></i>Atualizar
+        </button>
+      </div>
     </div>
 
-    <!-- Empty state -->
-    <div *ngIf="alarms.length === 0" class="rounded-xl p-12 text-center"
-         style="background:rgba(10,37,53,0.5); border:1px dashed #0d3348;">
-      <i class="pi pi-bell text-4xl block mb-4" style="color:#1e4257;"></i>
-      <h3 style="font-family:'Josefin Sans',sans-serif; font-size:0.8rem; font-weight:600; letter-spacing:0.08em; color:#3d6477;">Nenhum evento registrado</h3>
-      <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#2a4e62; margin-top:0.375rem; letter-spacing:0.04em;">Os alarmes aparecerão aqui quando forem acionados</p>
+    <div *ngIf="loadingAlarms" class="flex justify-center py-12">
+      <i class="pi pi-spin pi-spinner text-3xl" style="color:#0F8C8C; opacity:0.7;"></i>
+    </div>
+
+    <div *ngIf="!loadingAlarms" class="space-y-3">
+      <div *ngFor="let alarm of alarms"
+           class="rounded-xl p-4 flex items-start justify-between transition-all"
+           [style.background]="alarm.status === 'triggered' ? 'rgba(30,15,15,0.8)' : 'rgba(10,37,53,0.7)'"
+           [style.border]="alarm.status === 'triggered' ? '1px solid rgba(239,68,68,0.2)' : '1px solid #0d3348'">
+
+        <div class="flex items-start gap-4">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+               [style.background]="alarm.status === 'triggered' ? 'rgba(239,68,68,0.12)' : 'rgba(1,28,38,0.5)'"
+               [style.border]="alarm.status === 'triggered' ? '1px solid rgba(239,68,68,0.22)' : '1px solid #0d3348'">
+            <i class="pi text-base"
+               [class]="alarm.status === 'triggered' ? 'pi-exclamation-triangle' : 'pi-check'"
+               [style.color]="alarm.status === 'triggered' ? '#ef4444' : '#3d6477'"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 style="font-family:'Josefin Sans',sans-serif; font-size:0.875rem; font-weight:600; color:#a8c5d8; letter-spacing:0.03em;">
+                {{ alarm.trigger_type === 'motion' ? 'Movimento Detectado' : 'Alarme Manual' }}
+              </h3>
+              <span class="px-2 py-0.5 rounded-full"
+                    style="font-family:'Josefin Sans',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;"
+                    [style.background]="alarm.status === 'triggered' ? 'rgba(239,68,68,0.1)' : 'rgba(1,28,38,0.5)'"
+                    [style.color]="alarm.status === 'triggered' ? '#ef4444' : '#3d6477'"
+                    [style.border]="alarm.status === 'triggered' ? '1px solid rgba(239,68,68,0.2)' : '1px solid #0d3348'">
+                {{ alarm.status === 'triggered' ? 'Ativo' : 'Silenciado' }}
+              </span>
+            </div>
+            <p class="flex items-center gap-1.5 mt-1"
+               style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#5a8099; letter-spacing:0.04em;">
+              <i class="pi pi-map-marker text-xs"></i>{{ alarm.location || 'Local não especificado' }}
+            </p>
+            <p style="font-family:'Josefin Sans',sans-serif; font-size:0.65rem; color:#3d6477; letter-spacing:0.04em; margin-top:0.25rem;">
+              {{ alarm.triggered_at | date:'dd/MM/yyyy HH:mm:ss' }}
+            </p>
+          </div>
+        </div>
+
+        <button *ngIf="alarm.status === 'triggered'"
+                (click)="silenceAlarm(alarm)"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap flex-shrink-0 transition-all"
+                style="font-family:'Josefin Sans',sans-serif; font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:rgba(1,28,38,0.6); color:#5a8099; border:1px solid #0d3348; cursor:pointer;"
+                onmouseenter="this.style.background='rgba(1,28,38,0.9)'; this.style.borderColor='#1a4a62'; this.style.color='#a8c5d8'"
+                onmouseleave="this.style.background='rgba(1,28,38,0.6)'; this.style.borderColor='#0d3348'; this.style.color='#5a8099'">
+          <i class="pi pi-volume-off"></i>Silenciar
+        </button>
+      </div>
+
+      <div *ngIf="alarms.length === 0" class="rounded-xl p-12 text-center"
+           style="background:rgba(10,37,53,0.5); border:1px dashed #0d3348;">
+        <i class="pi pi-bell text-4xl block mb-4" style="color:#1e4257;"></i>
+        <h3 style="font-family:'Josefin Sans',sans-serif; font-size:0.8rem; font-weight:600; letter-spacing:0.08em; color:#3d6477;">Nenhum evento registrado</h3>
+        <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#2a4e62; margin-top:0.375rem; letter-spacing:0.04em;">Os alarmes aparecerão aqui quando forem acionados</p>
+      </div>
     </div>
   </div>
+
 </div>

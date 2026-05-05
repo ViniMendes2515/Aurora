@@ -39,6 +39,7 @@ func NewNATSPublisher(url string) (*NATSPublisher, error) {
 // scheduleExecutedEvent representa o payload publicado no tópico "schedule.executed"
 type scheduleExecutedEvent struct {
 	ScheduleID     string `json:"schedule_id"`
+	ScheduleName   string `json:"schedule_name"`
 	OwnerID        string `json:"owner_id"`
 	ActionType     string `json:"action_type"`
 	ActionDeviceID string `json:"action_device_id"`
@@ -50,6 +51,7 @@ type scheduleExecutedEvent struct {
 func (p *NATSPublisher) Dispatch(ctx context.Context, schedule *domain.Schedule) error {
 	payload := scheduleExecutedEvent{
 		ScheduleID:     schedule.ID,
+		ScheduleName:   schedule.Name,
 		OwnerID:        schedule.OwnerID,
 		ActionType:     string(schedule.Action.Type),
 		ActionDeviceID: schedule.Action.DeviceID,

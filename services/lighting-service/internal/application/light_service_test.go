@@ -15,11 +15,11 @@ import (
 // mockLightRepository simula o repositório de luzes em memória.
 // O campo `saved` captura a última luz persistida para validar o estado salvo.
 type mockLightRepository struct {
-	lights    map[string]*domain.Light
-	ownerMap  map[string][]*domain.Light
-	saved     *domain.Light
-	findErr   error
-	saveErr   error
+	lights   map[string]*domain.Light
+	ownerMap map[string][]*domain.Light
+	saved    *domain.Light
+	findErr  error
+	saveErr  error
 }
 
 func newMockRepo() *mockLightRepository {
@@ -129,7 +129,7 @@ func TestTurnOn_LuzNaoEncontrada(t *testing.T) {
 	repo := newMockRepo()
 	repo.findErr = errors.New("not found")
 
-	svc := application.NewLightService(repo, &mockDeviceClient{}, &mockStatePublisher{})
+	svc := application.NewLightService(repo, &mockDeviceClient{}, &mockStatePublisher{}, nil)
 
 	_, err := svc.TurnOn("luz-inexistente", "user-1")
 	if !errors.Is(err, domain.ErrLightNotFound) {
@@ -144,7 +144,7 @@ func TestTurnOn_AcessoNegado(t *testing.T) {
 	luz := novaLuzDoUsuario() // owner = "user-1"
 	repo.lights["luz-1"] = luz
 
-	svc := application.NewLightService(repo, &mockDeviceClient{}, &mockStatePublisher{})
+	svc := application.NewLightService(repo, &mockDeviceClient{}, &mockStatePublisher{}, nil)
 
 	_, err := svc.TurnOn("luz-1", "user-outro")
 	if !errors.Is(err, domain.ErrLightAccessDenied) {
@@ -162,7 +162,7 @@ func TestTurnOn_DispositivoInacessivel(t *testing.T) {
 	device := &mockDeviceClient{turnOnErr: errors.New("timeout")}
 	pub := &mockStatePublisher{}
 
-	svc := application.NewLightService(repo, device, pub)
+	svc := application.NewLightService(repo, device, pub, nil)
 
 	_, err := svc.TurnOn("luz-1", "user-1")
 	if !errors.Is(err, domain.ErrDeviceUnreachable) {
@@ -188,7 +188,7 @@ func TestTurnOn_Sucesso(t *testing.T) {
 	device := &mockDeviceClient{}
 	pub := &mockStatePublisher{}
 
-	svc := application.NewLightService(repo, device, pub)
+	svc := application.NewLightService(repo, device, pub, nil)
 
 	resp, err := svc.TurnOn("luz-1", "user-1")
 	if err != nil {
@@ -243,7 +243,7 @@ func TestTurnOff_Sucesso(t *testing.T) {
 	device := &mockDeviceClient{}
 	pub := &mockStatePublisher{}
 
-	svc := application.NewLightService(repo, device, pub)
+	svc := application.NewLightService(repo, device, pub, nil)
 
 	resp, err := svc.TurnOff("luz-1", "user-1")
 	if err != nil {
@@ -289,7 +289,7 @@ func TestGetStatus_Sucesso(t *testing.T) {
 	device := &mockDeviceClient{}
 	pub := &mockStatePublisher{}
 
-	svc := application.NewLightService(repo, device, pub)
+	svc := application.NewLightService(repo, device, pub, nil)
 
 	resp, err := svc.GetStatus("luz-1", "user-1")
 	if err != nil {
@@ -330,7 +330,7 @@ func TestListLights_RetornaLuzesDoUsuario(t *testing.T) {
 	repo.ownerMap["user-1"] = []*domain.Light{luz1, luz2}
 	repo.ownerMap["user-outro"] = []*domain.Light{luzOutro}
 
-	svc := application.NewLightService(repo, &mockDeviceClient{}, &mockStatePublisher{})
+	svc := application.NewLightService(repo, &mockDeviceClient{}, &mockStatePublisher{}, nil)
 
 	resps, err := svc.ListLights("user-1")
 	if err != nil {
