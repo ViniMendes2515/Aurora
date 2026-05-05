@@ -44,7 +44,7 @@ func (m *JWTManager) GenerateToken(userID, email string) (string, error) {
 
 // ValidateToken valida um token JWT e retorna as claims
 func (m *JWTManager) ValidateToken(tokenString string) (*domain.TokenClaims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, domain.ErrTokenValidation
 		}
