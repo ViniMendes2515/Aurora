@@ -70,6 +70,14 @@ Cada serviço representa um Bounded Context isolado com domínio próprio:
 ### Pré-requisitos
 
 - Docker e Docker Compose
+- **Docker Buildx** — necessário para o BuildKit (usado nos Dockerfiles com `--mount=type=cache`)
+  ```bash
+  mkdir -p ~/.docker/cli-plugins
+  curl -Lo ~/.docker/cli-plugins/docker-buildx \
+    "https://github.com/docker/buildx/releases/latest/download/buildx-v0.23.0.linux-amd64"
+  chmod +x ~/.docker/cli-plugins/docker-buildx
+  ```
+  > No Docker Desktop (Mac/Windows) o buildx já vem instalado. No Linux com Docker Engine é necessário instalar manualmente.
 - Go 1.21+
 - [swag CLI](https://github.com/swaggo/swag) (`go install github.com/swaggo/swag/cmd/swag@latest`)
 
