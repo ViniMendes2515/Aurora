@@ -75,12 +75,13 @@ func main() {
 
 	notifService := application.NewNotificationService(notifRepo, telegramSvc)
 
-	subscriber, err := messaging.NewNATSSubscriber(natsURL, notifService)
+	natsConn, err := messaging.NewNATSConnection(natsURL)
 	if err != nil {
 		log.Fatalf("Falha ao conectar ao NATS: %v", err)
 	}
-	defer subscriber.Close()
+	defer natsConn.Close()
 
+	subscriber := messaging.NewNATSSubscriber(natsConn, notifService)
 	if err := subscriber.Subscribe(); err != nil {
 		log.Fatalf("Falha ao registrar subscricoes NATS: %v", err)
 	}

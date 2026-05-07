@@ -7,22 +7,17 @@ import (
 	"aurora/services/security-service/internal/domain"
 )
 
-// AlarmEventPublisher publica eventos de alarme no NATS
-type AlarmEventPublisher interface {
-	PublishAlarmTriggered(alarmID, userID, triggerType, sensorID, location string)
-}
-
 // AlarmService implementa os casos de uso de segurança
 type AlarmService struct {
 	alarmRepo      domain.AlarmRepository
 	buzzerClient   domain.BuzzerClient
 	buzzerDuration time.Duration
 	deviceID       string
-	eventPublisher AlarmEventPublisher
+	eventPublisher domain.EventPublisher
 }
 
 // NewAlarmService cria uma nova instância de AlarmService
-func NewAlarmService(alarmRepo domain.AlarmRepository, buzzerClient domain.BuzzerClient, buzzerDurationMs int, deviceID string, eventPublisher AlarmEventPublisher) *AlarmService {
+func NewAlarmService(alarmRepo domain.AlarmRepository, buzzerClient domain.BuzzerClient, buzzerDurationMs int, deviceID string, eventPublisher domain.EventPublisher) *AlarmService {
 	return &AlarmService{
 		alarmRepo:      alarmRepo,
 		buzzerClient:   buzzerClient,
@@ -65,7 +60,10 @@ func (s *AlarmService) TriggerAlarm(userID, triggerType, sensorID, location stri
 	}
 
 	if s.eventPublisher != nil {
-		s.eventPublisher.PublishAlarmTriggered(event.ID, userID, triggerType, sensorID, location)
+		domainEvent := domain.NewAlarmTriggeredEvent(event)
+		if err := s.eventPublisher.PublishAlarmTriggered(domainEvent); err != nil {
+			log.Printf("[Event] Failed to publish alarm triggered: %v", err)
+		}
 	}
 
 	go func() {

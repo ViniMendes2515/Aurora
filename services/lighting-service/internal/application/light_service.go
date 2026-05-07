@@ -1,6 +1,8 @@
 package application
 
 import (
+	"log"
+
 	"aurora/services/lighting-service/internal/domain"
 )
 
@@ -9,21 +11,16 @@ type StatePublisher interface {
 	BroadcastState(lightID, name, location, state string)
 }
 
-// EventPublisher publica eventos de luz no NATS para outros serviços consumirem
-type EventPublisher interface {
-	PublishLightChanged(lightID, userID, name, location, state string)
-}
-
 // LightService implementa os casos de uso de iluminação
 type LightService struct {
 	lightRepo      domain.LightRepository
 	deviceClient   domain.DeviceClient
 	publisher      StatePublisher
-	eventPublisher EventPublisher
+	eventPublisher domain.EventPublisher
 }
 
 // NewLightService cria uma nova instância de LightService
-func NewLightService(lightRepo domain.LightRepository, deviceClient domain.DeviceClient, publisher StatePublisher, eventPublisher EventPublisher) *LightService {
+func NewLightService(lightRepo domain.LightRepository, deviceClient domain.DeviceClient, publisher StatePublisher, eventPublisher domain.EventPublisher) *LightService {
 	return &LightService{
 		lightRepo:      lightRepo,
 		deviceClient:   deviceClient,
@@ -34,9 +31,9 @@ func NewLightService(lightRepo domain.LightRepository, deviceClient domain.Devic
 
 // LightResponse representa a resposta de um comando de luz
 type LightResponse struct {
-	ID       string           `json:"id"`
-	Name     string           `json:"name"`
-	Location string           `json:"location"`
+	ID       string            `json:"id"`
+	Name     string            `json:"name"`
+	Location string            `json:"location"`
 	State    domain.LightState `json:"state"`
 }
 
@@ -46,6 +43,18 @@ func toResponse(l *domain.Light) *LightResponse {
 		Name:     l.Name,
 		Location: l.Location,
 		State:    l.State,
+	}
+}
+
+func (s *LightService) publishStateChanged(light *domain.Light, userID string) {
+	if s.publisher != nil {
+		s.publisher.BroadcastState(light.ID, light.Name, light.Location, string(light.State))
+	}
+	if s.eventPublisher != nil {
+		event := domain.NewLightStateChangedEvent(light.ID, userID, light.Name, light.Location, string(light.State))
+		if err := s.eventPublisher.PublishLightChanged(event); err != nil {
+			log.Printf("[Event] Failed to publish light changed: %v", err)
+		}
 	}
 }
 
@@ -69,13 +78,7 @@ func (s *LightService) TurnOn(lightID, userID string) (*LightResponse, error) {
 		return nil, err
 	}
 
-	if s.publisher != nil {
-		s.publisher.BroadcastState(light.ID, light.Name, light.Location, string(light.State))
-	}
-	if s.eventPublisher != nil {
-		s.eventPublisher.PublishLightChanged(light.ID, userID, light.Name, light.Location, string(light.State))
-	}
-
+	s.publishStateChanged(light, userID)
 	return toResponse(light), nil
 }
 
@@ -99,13 +102,7 @@ func (s *LightService) TurnOff(lightID, userID string) (*LightResponse, error) {
 		return nil, err
 	}
 
-	if s.publisher != nil {
-		s.publisher.BroadcastState(light.ID, light.Name, light.Location, string(light.State))
-	}
-	if s.eventPublisher != nil {
-		s.eventPublisher.PublishLightChanged(light.ID, userID, light.Name, light.Location, string(light.State))
-	}
-
+	s.publishStateChanged(light, userID)
 	return toResponse(light), nil
 }
 
