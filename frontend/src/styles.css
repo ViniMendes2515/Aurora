@@ -1,4 +1,9 @@
 /* Aurora Home System - Global Styles */
+
+/* Remove number input spinners */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -226,6 +231,16 @@ h1, h2, h3 {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--aurora-primary);
+}
+
+/* Schedule inline accordion animation */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.schedule-detail-enter {
+  animation: slideDown 0.22s ease-out forwards;
 }
 
 /* Star particle background effect */

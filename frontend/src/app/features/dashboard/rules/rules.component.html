@@ -31,22 +31,23 @@
       <!-- Trigger type -->
       <div class="flex flex-col gap-1.5">
         <label style="font-family:'Josefin Sans',sans-serif; font-size:0.675rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#5a8099;">Gatilho</label>
-        <select [(ngModel)]="newRule.trigger_type"
+        <select [(ngModel)]="newRule.trigger_type" (ngModelChange)="onTriggerTypeChange()"
                 style="background:rgba(1,28,38,0.9); border:1px solid #0d3348; border-radius:8px; padding:0.625rem 0.875rem; color:#a8c5d8; font-family:'Josefin Sans',sans-serif; font-size:0.875rem; outline:none; width:100%;">
-          <option value="motion" style="background:#011C26;">Detecção de presença (PIR)</option>
-          <option value="light_low" style="background:#011C26;">Luminosidade baixa (LDR)</option>
-          <option value="light_high" style="background:#011C26;">Luminosidade alta (LDR)</option>
+          <option value="motion" style="background:#011C26;">Detecção de presença</option>
+          <option value="light_low" style="background:#011C26;">Luminosidade baixa</option>
+          <option value="light_high" style="background:#011C26;">Luminosidade alta</option>
         </select>
       </div>
 
-      <!-- Trigger ID -->
+      <!-- Sensor (auto, read-only badge) -->
       <div class="flex flex-col gap-1.5">
-        <label style="font-family:'Josefin Sans',sans-serif; font-size:0.675rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#5a8099;">Sensor gatilho</label>
-        <input [(ngModel)]="newRule.trigger_id" type="text"
-               [placeholder]="newRule.trigger_type === 'light_low' || newRule.trigger_type === 'light_high' ? 'Ex: esp32-ldr-001' : 'Ex: esp32-pir-001'"
-               style="background:rgba(1,28,38,0.9); border:1px solid #0d3348; border-radius:8px; padding:0.625rem 0.875rem; color:#a8c5d8; font-family:'Josefin Sans',sans-serif; font-size:0.875rem; outline:none; width:100%;"
-               onfocus="this.style.borderColor='#0F8C8C'; this.style.boxShadow='0 0 0 3px rgba(15,140,140,0.15)'"
-               onblur="this.style.borderColor='#0d3348'; this.style.boxShadow='none'">
+        <label style="font-family:'Josefin Sans',sans-serif; font-size:0.675rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#5a8099;">Sensor</label>
+        <div class="flex items-center gap-2"
+             style="background:rgba(1,28,38,0.6); border:1px solid #0d3348; border-radius:8px; padding:0.625rem 0.875rem;">
+          <i class="pi pi-microchip" style="color:#0F8C8C; font-size:0.75rem; opacity:0.7;"></i>
+          <span style="font-family:'Josefin Sans',sans-serif; font-size:0.875rem; color:#a8c5d8;">{{ getSensorLabel(newRule.trigger_id) }}</span>
+          <span style="font-family:'Josefin Sans',sans-serif; font-size:0.6rem; color:#3d6477; margin-left:auto; letter-spacing:0.06em; text-transform:uppercase;">automático</span>
+        </div>
       </div>
 
       <!-- Threshold (conditional) -->
@@ -54,7 +55,7 @@
         <label style="font-family:'Josefin Sans',sans-serif; font-size:0.675rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#5a8099;">
           {{ newRule.trigger_type === 'light_low' ? 'Limiar — luz baixa abaixo de (%)' : 'Limiar — luz alta acima de (%)' }}
         </label>
-        <input [(ngModel)]="newRule.trigger_threshold" type="number" min="1" max="100" step="1" placeholder="30"
+        <input [(ngModel)]="newRule.trigger_threshold" type="number" min="1" max="100" placeholder="30"
                style="background:rgba(1,28,38,0.9); border:1px solid #0d3348; border-radius:8px; padding:0.625rem 0.875rem; color:#a8c5d8; font-family:'Josefin Sans',sans-serif; font-size:0.875rem; outline:none; width:100%;"
                onfocus="this.style.borderColor='#0F8C8C'"
                onblur="this.style.borderColor='#0d3348'">
@@ -69,7 +70,7 @@
       <!-- Action type -->
       <div class="flex flex-col gap-1.5">
         <label style="font-family:'Josefin Sans',sans-serif; font-size:0.675rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#5a8099;">Ação</label>
-        <select [(ngModel)]="newRule.action_type"
+        <select [(ngModel)]="newRule.action_type" (ngModelChange)="onActionTypeChange()"
                 style="background:rgba(1,28,38,0.9); border:1px solid #0d3348; border-radius:8px; padding:0.625rem 0.875rem; color:#a8c5d8; font-family:'Josefin Sans',sans-serif; font-size:0.875rem; outline:none; width:100%;">
           <option value="turn_on_light" style="background:#011C26;">Ligar luz</option>
           <option value="turn_off_light" style="background:#011C26;">Desligar luz</option>
@@ -87,11 +88,15 @@
         </select>
       </div>
 
-      <!-- Action target — alarm -->
+      <!-- Action target — alarm (auto, no input needed) -->
       <div *ngIf="newRule.action_type === 'trigger_alarm'" class="flex flex-col gap-1.5">
-        <label style="font-family:'Josefin Sans',sans-serif; font-size:0.675rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#5a8099;">Dispositivo alvo</label>
-        <input [(ngModel)]="newRule.action_id" type="text" placeholder="alarme"
-               style="background:rgba(1,28,38,0.9); border:1px solid #0d3348; border-radius:8px; padding:0.625rem 0.875rem; color:#a8c5d8; font-family:'Josefin Sans',sans-serif; font-size:0.875rem; outline:none; width:100%;">
+        <label style="font-family:'Josefin Sans',sans-serif; font-size:0.675rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#5a8099;">Dispositivo</label>
+        <div class="flex items-center gap-2"
+             style="background:rgba(1,28,38,0.6); border:1px solid #0d3348; border-radius:8px; padding:0.625rem 0.875rem;">
+          <i class="pi pi-bell" style="color:#e8a94b; font-size:0.75rem; opacity:0.8;"></i>
+          <span style="font-family:'Josefin Sans',sans-serif; font-size:0.875rem; color:#a8c5d8;">Alarme</span>
+          <span style="font-family:'Josefin Sans',sans-serif; font-size:0.6rem; color:#3d6477; margin-left:auto; letter-spacing:0.06em; text-transform:uppercase;">automático</span>
+        </div>
       </div>
     </div>
 
@@ -110,26 +115,30 @@
   <!-- Rules list -->
   <div *ngIf="!loading" class="space-y-3">
     <div *ngFor="let rule of rules"
-         class="rounded-xl p-4 flex items-center justify-between transition-all"
+         class="rounded-xl p-4 flex items-stretch gap-3 transition-all"
          style="background:rgba(10,37,53,0.7); border:1px solid #0d3348;">
-      <div class="flex items-center gap-4">
-        <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-             style="background:rgba(15,140,140,0.1); border:1px solid rgba(15,140,140,0.18);">
-          <i class="pi pi-cog" style="color:#0F8C8C; font-size:0.875rem;"></i>
-        </div>
-        <div>
-          <h3 style="font-family:'Josefin Sans',sans-serif; font-size:0.875rem; font-weight:600; color:#a8c5d8; letter-spacing:0.03em;">{{ rule.name }}</h3>
-          <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#5a8099; margin-top:0.25rem; letter-spacing:0.03em;">
-            <span style="color:#a8c5d8; font-weight:600;">Se:</span> {{ getTriggerLabel(rule) }}
-            <span style="color:#3d6477; margin:0 0.375rem;">→</span>
-            <span style="color:#a8c5d8; font-weight:600;">Então:</span> {{ getActionLabel(rule.action_type) }}
-            <span *ngIf="rule.action_id" style="color:#3d6477;"> ({{ getActionTargetLabel(rule) }})</span>
-          </p>
-        </div>
+
+      <!-- Icon -->
+      <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+           style="background:rgba(15,140,140,0.1); border:1px solid rgba(15,140,140,0.18);">
+        <i class="pi pi-cog" style="color:#0F8C8C; font-size:0.875rem;"></i>
       </div>
-      <div class="flex items-center gap-3 flex-shrink-0">
+
+      <!-- Content -->
+      <div class="flex-1 min-w-0">
+        <h3 style="font-family:'Josefin Sans',sans-serif; font-size:0.875rem; font-weight:600; color:#a8c5d8; letter-spacing:0.03em;">{{ rule.name }}</h3>
+        <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#5a8099; margin-top:0.3rem; letter-spacing:0.03em; line-height:1.6;">
+          <span style="color:#a8c5d8; font-weight:600;">Se:</span> {{ getTriggerLabel(rule) }}
+          <span style="color:#3d6477; margin:0 0.3rem;">→</span>
+          <span style="color:#a8c5d8; font-weight:600;">Então:</span> {{ getActionLabel(rule.action_type) }}
+          <span *ngIf="rule.action_id" style="color:#3d6477;"> ({{ getActionTargetLabel(rule) }})</span>
+        </p>
+      </div>
+
+      <!-- Controls: coluna no mobile (toggle topo / botões base), linha no desktop -->
+      <div class="flex flex-col justify-between items-end flex-shrink-0 md:flex-row md:items-center md:gap-2 md:justify-normal">
         <!-- Toggle switch -->
-        <button (click)="toggleRule(rule)" class="flex items-center gap-2 group" style="background:none; border:none; cursor:pointer; padding:0;">
+        <button (click)="toggleRule(rule)" class="flex items-center gap-1.5" style="background:none; border:none; cursor:pointer; padding:0;">
           <div class="relative" style="width:36px; height:20px;">
             <div class="absolute inset-0 rounded-full transition-all duration-200"
                  [style.background]="rule.enabled ? 'rgba(15,140,140,0.25)' : 'rgba(1,28,38,0.8)'"
@@ -144,20 +153,23 @@
             {{ rule.enabled ? 'Ativa' : 'Inativa' }}
           </span>
         </button>
-        <button (click)="startEdit(rule)"
-                class="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
-                style="background:transparent; border:1px solid #0d3348; color:#5a8099;"
-                onmouseenter="this.style.borderColor='rgba(15,140,140,0.3)'; this.style.color='#0F8C8C'"
-                onmouseleave="this.style.borderColor='#0d3348'; this.style.color='#5a8099'">
-          <i class="pi pi-pencil text-xs"></i>
-        </button>
-        <button (click)="deleteRule(rule.id)"
-                class="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
-                style="background:transparent; border:1px solid #0d3348; color:#5a8099;"
-                onmouseenter="this.style.borderColor='rgba(239,68,68,0.3)'; this.style.color='#ef4444'"
-                onmouseleave="this.style.borderColor='#0d3348'; this.style.color='#5a8099'">
-          <i class="pi pi-trash text-xs"></i>
-        </button>
+        <!-- Edit + Delete -->
+        <div class="flex items-center gap-2 md:contents">
+          <button (click)="startEdit(rule)"
+                  class="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
+                  style="background:transparent; border:1px solid #0d3348; color:#5a8099;"
+                  onmouseenter="this.style.borderColor='rgba(15,140,140,0.3)'; this.style.color='#0F8C8C'"
+                  onmouseleave="this.style.borderColor='#0d3348'; this.style.color='#5a8099'">
+            <i class="pi pi-pencil text-xs"></i>
+          </button>
+          <button (click)="deleteRule(rule.id)"
+                  class="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
+                  style="background:transparent; border:1px solid #0d3348; color:#5a8099;"
+                  onmouseenter="this.style.borderColor='rgba(239,68,68,0.3)'; this.style.color='#ef4444'"
+                  onmouseleave="this.style.borderColor='#0d3348'; this.style.color='#5a8099'">
+            <i class="pi pi-trash text-xs"></i>
+          </button>
+        </div>
       </div>
     </div>
 

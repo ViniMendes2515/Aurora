@@ -1,4 +1,4 @@
-<div class="flex gap-6 h-full">
+<div class="space-y-6">
 
   <!-- LEFT PANEL -->
   <div class="flex-1 min-w-0 space-y-6">
@@ -181,44 +181,47 @@
 
     <!-- List -->
     <div *ngIf="!loading" class="space-y-3">
-      <div *ngFor="let schedule of schedules"
-           (click)="selectSchedule(schedule)"
-           class="rounded-xl p-4 cursor-pointer transition-all duration-300"
-           [style.background]="selectedSchedule?.id === schedule.id ? 'rgba(15,140,140,0.08)' : 'rgba(10,37,53,0.7)'"
-           [style.border]="selectedSchedule?.id === schedule.id ? '1px solid rgba(15,140,140,0.35)' : '1px solid #0d3348'">
+      <ng-container *ngFor="let schedule of schedules">
 
-        <div class="flex items-start justify-between gap-4">
-          <div class="flex items-start gap-3 min-w-0">
-            <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                 style="background:rgba(15,140,140,0.1); border:1px solid rgba(15,140,140,0.18);">
-              <i class="pi pi-calendar" style="color:#0F8C8C; font-size:0.875rem;"></i>
-            </div>
-            <div class="min-w-0">
-              <div class="flex items-center gap-2 flex-wrap">
-                <h3 style="font-family:'Josefin Sans',sans-serif; font-size:0.875rem; font-weight:600; color:#a8c5d8; letter-spacing:0.03em;">{{ schedule.name }}</h3>
-                <span class="px-2 py-0.5 rounded border"
-                      [style.color]="schedule.enabled ? '#4ade80' : '#5a8099'"
-                      [style.border-color]="schedule.enabled ? 'rgba(74,222,128,0.3)' : '#0d3348'"
-                      [style.background]="schedule.enabled ? 'rgba(74,222,128,0.06)' : 'transparent'"
-                      style="font-family:'Josefin Sans',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;">
-                  {{ schedule.enabled ? 'ativo' : 'inativo' }}
-                </span>
-              </div>
-              <p style="font-family:'Josefin Sans',sans-serif; font-size:0.72rem; color:#5a8099; margin-top:0.3rem;">
-                <i class="pi pi-clock mr-1.5 text-xs" style="color:#3d6477;"></i>{{ describeSchedule(schedule) }}
-              </p>
-              <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#3d6477; margin-top:0.2rem;">
-                <i class="pi pi-bolt mr-1.5 text-xs"></i>{{ actionLabel(schedule.action_type) }}
-                <span *ngIf="schedule.action_device_id">
-                  — {{ (schedule.action_type === 'turn_on_light' || schedule.action_type === 'turn_off_light') ? lightName(schedule.action_device_id) : schedule.action_device_id }}
-                </span>
-              </p>
-            </div>
+        <!-- Card -->
+        <div (click)="selectSchedule(schedule)"
+             class="rounded-xl p-4 cursor-pointer transition-all duration-300 flex items-stretch gap-3"
+             [style.background]="selectedSchedule?.id === schedule.id ? 'rgba(15,140,140,0.08)' : 'rgba(10,37,53,0.7)'"
+             [style.border]="selectedSchedule?.id === schedule.id ? '1px solid rgba(15,140,140,0.35)' : '1px solid #0d3348'">
+
+          <!-- Icon -->
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+               style="background:rgba(15,140,140,0.1); border:1px solid rgba(15,140,140,0.18);">
+            <i class="pi pi-calendar" style="color:#0F8C8C; font-size:0.875rem;"></i>
           </div>
 
-          <div class="flex items-center gap-2 flex-shrink-0">
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 style="font-family:'Josefin Sans',sans-serif; font-size:0.875rem; font-weight:600; color:#a8c5d8; letter-spacing:0.03em;">{{ schedule.name }}</h3>
+              <span class="px-2 py-0.5 rounded border"
+                    [style.color]="schedule.enabled ? '#4ade80' : '#5a8099'"
+                    [style.border-color]="schedule.enabled ? 'rgba(74,222,128,0.3)' : '#0d3348'"
+                    [style.background]="schedule.enabled ? 'rgba(74,222,128,0.06)' : 'transparent'"
+                    style="font-family:'Josefin Sans',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;">
+                {{ schedule.enabled ? 'ativo' : 'inativo' }}
+              </span>
+            </div>
+            <p style="font-family:'Josefin Sans',sans-serif; font-size:0.72rem; color:#5a8099; margin-top:0.3rem; line-height:1.5;">
+              <i class="pi pi-clock mr-1.5 text-xs" style="color:#3d6477;"></i>{{ describeSchedule(schedule) }}
+            </p>
+            <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#3d6477; margin-top:0.2rem; line-height:1.5;">
+              <i class="pi pi-bolt mr-1.5 text-xs"></i>{{ actionLabel(schedule.action_type) }}
+              <span *ngIf="schedule.action_device_id">
+                — {{ (schedule.action_type === 'turn_on_light' || schedule.action_type === 'turn_off_light') ? lightName(schedule.action_device_id) : schedule.action_device_id }}
+              </span>
+            </p>
+          </div>
+
+          <!-- Controls: toggle topo / botões base no mobile; linha no desktop -->
+          <div class="flex flex-col justify-between items-end flex-shrink-0 md:flex-row md:items-center md:gap-2 md:justify-normal">
             <button (click)="toggleSchedule(schedule, $event)"
-                    class="flex items-center group" style="background:none; border:none; cursor:pointer; padding:0;">
+                    class="flex items-center" style="background:none; border:none; cursor:pointer; padding:0;">
               <div class="relative" style="width:36px; height:20px;">
                 <div class="absolute inset-0 rounded-full transition-all duration-200"
                      [style.background]="schedule.enabled ? 'rgba(15,140,140,0.25)' : 'rgba(1,28,38,0.8)'"
@@ -229,30 +232,114 @@
                      [style.background]="schedule.enabled ? '#0F8C8C' : '#3d6477'"></div>
               </div>
             </button>
-            <button (click)="startEdit(schedule, $event)"
-                    class="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
-                    style="background:transparent; border:1px solid #0d3348; color:#5a8099;"
-                    onmouseenter="this.style.borderColor='rgba(15,140,140,0.3)'; this.style.color='#0F8C8C'"
-                    onmouseleave="this.style.borderColor='#0d3348'; this.style.color='#5a8099'">
-              <i class="pi pi-pencil text-xs"></i>
-            </button>
-            <button (click)="deleteSchedule(schedule.id, $event)"
-                    class="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
-                    style="background:transparent; border:1px solid #0d3348; color:#5a8099;"
-                    onmouseenter="this.style.borderColor='rgba(239,68,68,0.3)'; this.style.color='#ef4444'"
-                    onmouseleave="this.style.borderColor='#0d3348'; this.style.color='#5a8099'">
-              <i class="pi pi-trash text-xs"></i>
-            </button>
-            <button (click)="selectSchedule(schedule); $event.stopPropagation()"
-                    class="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
-                    style="background:transparent; border:1px solid #0d3348; color:#5a8099;"
-                    onmouseenter="this.style.borderColor='rgba(15,140,140,0.3)'; this.style.color='#0F8C8C'"
-                    onmouseleave="this.style.borderColor='#0d3348'; this.style.color='#5a8099'">
-              <i class="pi pi-chevron-right text-xs"></i>
-            </button>
+            <div class="flex items-center gap-2 md:contents">
+              <button (click)="startEdit(schedule, $event)"
+                      class="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
+                      style="background:transparent; border:1px solid #0d3348; color:#5a8099;"
+                      onmouseenter="this.style.borderColor='rgba(15,140,140,0.3)'; this.style.color='#0F8C8C'"
+                      onmouseleave="this.style.borderColor='#0d3348'; this.style.color='#5a8099'">
+                <i class="pi pi-pencil text-xs"></i>
+              </button>
+              <button (click)="deleteSchedule(schedule.id, $event)"
+                      class="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
+                      style="background:transparent; border:1px solid #0d3348; color:#5a8099;"
+                      onmouseenter="this.style.borderColor='rgba(239,68,68,0.3)'; this.style.color='#ef4444'"
+                      onmouseleave="this.style.borderColor='#0d3348'; this.style.color='#5a8099'">
+                <i class="pi pi-trash text-xs"></i>
+              </button>
+              <!-- Chevron: rotaciona quando expandido -->
+              <button (click)="selectSchedule(schedule); $event.stopPropagation()"
+                      class="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
+                      style="background:transparent; border:1px solid #0d3348; color:#5a8099;"
+                      onmouseenter="this.style.borderColor='rgba(15,140,140,0.3)'; this.style.color='#0F8C8C'"
+                      onmouseleave="this.style.borderColor='#0d3348'; this.style.color='#5a8099'">
+                <i class="pi pi-chevron-down text-xs transition-transform duration-300"
+                   [style.transform]="selectedSchedule?.id === schedule.id ? 'rotate(180deg)' : 'rotate(0deg)'"></i>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+
+        <!-- Inline detail panel — aparece abaixo do card -->
+        <div *ngIf="selectedSchedule?.id === schedule.id"
+             class="rounded-xl overflow-hidden schedule-detail-enter"
+             style="background:rgba(1,28,38,0.85); border:1px solid rgba(15,140,140,0.2);">
+
+          <!-- Tabs -->
+          <div class="flex border-b" style="border-color:#0d3348;">
+            <button (click)="setTab('history'); $event.stopPropagation()"
+                    class="flex-1 py-2.5 text-xs font-semibold tracking-widest uppercase transition-all"
+                    style="font-family:'Josefin Sans',sans-serif; background:transparent; border:none; cursor:pointer;"
+                    [style.color]="activeTab === 'history' ? '#0F8C8C' : '#5a8099'"
+                    [style.border-bottom]="activeTab === 'history' ? '2px solid #0F8C8C' : '2px solid transparent'">
+              Histórico
+            </button>
+            <button (click)="setTab('preview'); $event.stopPropagation()"
+                    class="flex-1 py-2.5 text-xs font-semibold tracking-widest uppercase transition-all"
+                    style="font-family:'Josefin Sans',sans-serif; background:transparent; border:none; cursor:pointer;"
+                    [style.color]="activeTab === 'preview' ? '#0F8C8C' : '#5a8099'"
+                    [style.border-bottom]="activeTab === 'preview' ? '2px solid #0F8C8C' : '2px solid transparent'">
+              Preview
+            </button>
+            <button (click)="closeDetail(); $event.stopPropagation()"
+                    class="w-10 flex items-center justify-center transition-all flex-shrink-0"
+                    style="background:transparent; border:none; border-left:1px solid #0d3348; color:#3d6477; cursor:pointer;"
+                    onmouseenter="this.style.color='#ef4444'"
+                    onmouseleave="this.style.color='#3d6477'">
+              <i class="pi pi-times text-xs"></i>
+            </button>
+          </div>
+
+          <!-- History tab -->
+          <div *ngIf="activeTab === 'history'" class="p-4 space-y-2 max-h-72 overflow-y-auto" (click)="$event.stopPropagation()">
+            <div *ngIf="loadingExecutions" class="flex justify-center py-8">
+              <i class="pi pi-spin pi-spinner" style="color:#0F8C8C; opacity:0.7;"></i>
+            </div>
+            <div *ngIf="!loadingExecutions && executions.length === 0" class="py-8 text-center">
+              <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#3d6477;">Nenhuma execução registrada.</p>
+            </div>
+            <div *ngFor="let exec of executions"
+                 class="flex items-start gap-3 py-2 border-b last:border-0"
+                 style="border-color:#0a2535;">
+              <i class="pi mt-0.5 flex-shrink-0"
+                 [class]="exec.status === 'success' ? 'pi-check-circle' : exec.status === 'failed' ? 'pi-times-circle' : 'pi-minus-circle'"
+                 [style.color]="exec.status === 'success' ? '#4ade80' : exec.status === 'failed' ? '#f87171' : '#5a8099'"
+                 style="font-size:0.875rem;"></i>
+              <div class="min-w-0">
+                <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#a8c5d8;">{{ formatDate(exec.executed_at) }}</p>
+                <p *ngIf="exec.status === 'failed' && exec.error_message"
+                   style="font-family:'Josefin Sans',sans-serif; font-size:0.65rem; color:#f87171; margin-top:0.2rem; word-break:break-word;">
+                  {{ exec.error_message }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview tab -->
+          <div *ngIf="activeTab === 'preview'" class="p-4" (click)="$event.stopPropagation()">
+            <div *ngIf="schedule.schedule_type === 'one_shot'" class="py-6 text-center">
+              <i class="pi pi-info-circle block mb-2" style="color:#3d6477; font-size:1.25rem;"></i>
+              <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#3d6477; line-height:1.6;">Preview disponível apenas para agendamentos recorrentes.</p>
+            </div>
+            <div *ngIf="schedule.schedule_type === 'cron'" class="space-y-4">
+              <button (click)="loadPreview(); $event.stopPropagation()" [disabled]="loadingPreview" class="btn-primary w-full disabled:opacity-40 disabled:cursor-not-allowed text-sm">
+                <i class="pi mr-2" [class]="loadingPreview ? 'pi-spin pi-spinner' : 'pi-calendar'"></i>
+                Ver próximas execuções
+              </button>
+              <div *ngIf="previewDates.length > 0" class="space-y-1.5">
+                <div *ngFor="let date of previewDates; let i = index"
+                     class="flex items-center gap-3 px-3 py-2 rounded-lg"
+                     style="background:rgba(15,140,140,0.05); border:1px solid rgba(15,140,140,0.12);">
+                  <span style="font-family:'Josefin Sans',sans-serif; font-size:0.65rem; font-weight:700; color:#0F8C8C; min-width:1rem; text-align:center;">{{ i + 1 }}</span>
+                  <span style="font-family:'Josefin Sans',sans-serif; font-size:0.75rem; color:#a8c5d8;">{{ formatDate(date) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </ng-container>
 
       <!-- Empty state -->
       <div *ngIf="schedules.length === 0" class="rounded-xl p-12 text-center"
@@ -262,93 +349,6 @@
         <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#2a4e62; margin-top:0.375rem; letter-spacing:0.04em;">Crie agendamentos para automatizar ações no tempo certo</p>
       </div>
     </div>
-  </div>
-
-  <!-- RIGHT PANEL -->
-  <div *ngIf="selectedSchedule"
-       class="w-96 flex-shrink-0 rounded-xl transition-all duration-300"
-       style="background:rgba(1,28,38,0.85); border:1px solid rgba(15,140,140,0.2); align-self:flex-start; position:sticky; top:0;">
-
-    <div class="flex items-center justify-between p-4 border-b" style="border-color:#0d3348;">
-      <div class="min-w-0 flex-1">
-        <h2 style="font-family:'Josefin Sans',sans-serif; font-size:0.875rem; font-weight:600; color:#a8c5d8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-          {{ selectedSchedule.name }}
-        </h2>
-        <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#5a8099; margin-top:0.2rem;">
-          {{ describeSchedule(selectedSchedule) }}
-        </p>
-      </div>
-      <button (click)="closeDetail()"
-              class="w-7 h-7 rounded-lg flex items-center justify-center transition-all ml-3 flex-shrink-0"
-              style="background:transparent; border:1px solid #0d3348; color:#5a8099;"
-              onmouseenter="this.style.borderColor='rgba(239,68,68,0.3)'; this.style.color='#ef4444'"
-              onmouseleave="this.style.borderColor='#0d3348'; this.style.color='#5a8099'">
-        <i class="pi pi-times text-xs"></i>
-      </button>
-    </div>
-
-    <div class="flex border-b" style="border-color:#0d3348;">
-      <button (click)="setTab('history')"
-              class="flex-1 py-2.5 text-xs font-semibold tracking-widest uppercase transition-all"
-              style="font-family:'Josefin Sans',sans-serif; background:transparent; border:none; cursor:pointer;"
-              [style.color]="activeTab === 'history' ? '#0F8C8C' : '#5a8099'"
-              [style.border-bottom]="activeTab === 'history' ? '2px solid #0F8C8C' : '2px solid transparent'">
-        Histórico
-      </button>
-      <button (click)="setTab('preview')"
-              class="flex-1 py-2.5 text-xs font-semibold tracking-widest uppercase transition-all"
-              style="font-family:'Josefin Sans',sans-serif; background:transparent; border:none; cursor:pointer;"
-              [style.color]="activeTab === 'preview' ? '#0F8C8C' : '#5a8099'"
-              [style.border-bottom]="activeTab === 'preview' ? '2px solid #0F8C8C' : '2px solid transparent'">
-        Preview
-      </button>
-    </div>
-
-    <div *ngIf="activeTab === 'history'" class="p-4 space-y-2 max-h-96 overflow-y-auto">
-      <div *ngIf="loadingExecutions" class="flex justify-center py-8">
-        <i class="pi pi-spin pi-spinner" style="color:#0F8C8C; opacity:0.7;"></i>
-      </div>
-      <div *ngIf="!loadingExecutions && executions.length === 0" class="py-8 text-center">
-        <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#3d6477;">Nenhuma execução registrada.</p>
-      </div>
-      <div *ngFor="let exec of executions"
-           class="flex items-start gap-3 py-2 border-b last:border-0"
-           style="border-color:#0a2535;">
-        <i class="pi mt-0.5 flex-shrink-0"
-           [class]="exec.status === 'success' ? 'pi-check-circle' : exec.status === 'failed' ? 'pi-times-circle' : 'pi-minus-circle'"
-           [style.color]="exec.status === 'success' ? '#4ade80' : exec.status === 'failed' ? '#f87171' : '#5a8099'"
-           style="font-size:0.875rem;"></i>
-        <div class="min-w-0">
-          <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#a8c5d8;">{{ formatDate(exec.executed_at) }}</p>
-          <p *ngIf="exec.status === 'failed' && exec.error_message"
-             style="font-family:'Josefin Sans',sans-serif; font-size:0.65rem; color:#f87171; margin-top:0.2rem; word-break:break-word;">
-            {{ exec.error_message }}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div *ngIf="activeTab === 'preview'" class="p-4">
-      <div *ngIf="selectedSchedule.schedule_type === 'one_shot'" class="py-6 text-center">
-        <i class="pi pi-info-circle block mb-2" style="color:#3d6477; font-size:1.25rem;"></i>
-        <p style="font-family:'Josefin Sans',sans-serif; font-size:0.7rem; color:#3d6477; line-height:1.6;">Preview disponível apenas para agendamentos recorrentes.</p>
-      </div>
-      <div *ngIf="selectedSchedule.schedule_type === 'cron'" class="space-y-4">
-        <button (click)="loadPreview()" [disabled]="loadingPreview" class="btn-primary w-full disabled:opacity-40 disabled:cursor-not-allowed text-sm">
-          <i class="pi mr-2" [class]="loadingPreview ? 'pi-spin pi-spinner' : 'pi-calendar'"></i>
-          Ver próximas execuções
-        </button>
-        <div *ngIf="previewDates.length > 0" class="space-y-1.5">
-          <div *ngFor="let date of previewDates; let i = index"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg"
-               style="background:rgba(15,140,140,0.05); border:1px solid rgba(15,140,140,0.12);">
-            <span style="font-family:'Josefin Sans',sans-serif; font-size:0.65rem; font-weight:700; color:#0F8C8C; min-width:1rem; text-align:center;">{{ i + 1 }}</span>
-            <span style="font-family:'Josefin Sans',sans-serif; font-size:0.75rem; color:#a8c5d8;">{{ formatDate(date) }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </div>
 
 </div>

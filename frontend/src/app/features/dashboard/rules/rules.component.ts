@@ -25,6 +25,17 @@ export class RulesComponent implements OnInit {
     action_id: ''
   };
 
+  private readonly TRIGGER_SENSOR_MAP: Record<string, string> = {
+    motion: 'esp32-pir-001',
+    light_low: 'esp32-ldr-001',
+    light_high: 'esp32-ldr-001'
+  };
+
+  private readonly SENSOR_FRIENDLY: Record<string, string> = {
+    'esp32-pir-001': 'Sensor de Presença',
+    'esp32-ldr-001': 'Sensor de Luminosidade'
+  };
+
   constructor(
     private rulesService: RulesService,
     private lightingService: LightingService
@@ -33,6 +44,22 @@ export class RulesComponent implements OnInit {
   ngOnInit(): void {
     this.loadRules();
     this.loadLights();
+  }
+
+  onTriggerTypeChange(): void {
+    this.newRule.trigger_id = this.TRIGGER_SENSOR_MAP[this.newRule.trigger_type] || '';
+  }
+
+  onActionTypeChange(): void {
+    if (this.newRule.action_type === 'trigger_alarm') {
+      this.newRule.action_id = 'alarme';
+    } else {
+      this.newRule.action_id = '';
+    }
+  }
+
+  getSensorLabel(sensorId: string): string {
+    return this.SENSOR_FRIENDLY[sensorId] || sensorId;
   }
 
   toggleForm(): void {
