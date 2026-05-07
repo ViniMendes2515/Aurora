@@ -63,12 +63,13 @@ func main() {
 	}
 	rulesEngine := application.NewRulesEngine(ruleRepo, lightingURL, securityURL, deviceAPIKey, timeout)
 
-	subscriber, err := messaging.NewNATSSubscriber(natsURL, rulesEngine)
+	natsConn, err := messaging.NewNATSConnection(natsURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to NATS: %v", err)
 	}
-	defer subscriber.Close()
+	defer natsConn.Close()
 
+	subscriber := messaging.NewNATSSubscriber(natsConn, rulesEngine)
 	if err := subscriber.Subscribe(); err != nil {
 		log.Fatalf("Failed to subscribe to NATS: %v", err)
 	}

@@ -60,12 +60,13 @@ func main() {
 
 	hub := ws.NewHub()
 
-	natsPublisher, err := messaging.NewNATSLightPublisher(natsURL)
+	var natsPublisher *messaging.NATSLightPublisher
+	natsConn, err := messaging.NewNATSConnection(natsURL)
 	if err != nil {
 		log.Printf("Aviso: falha ao conectar ao NATS — eventos de luz nao serao publicados: %v", err)
-	}
-	if natsPublisher != nil {
-		defer natsPublisher.Close()
+	} else {
+		defer natsConn.Close()
+		natsPublisher = messaging.NewNATSLightPublisher(natsConn)
 	}
 
 	lightService := application.NewLightService(lightRepo, esp32Client, hub, natsPublisher)

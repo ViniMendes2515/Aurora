@@ -66,11 +66,12 @@ func main() {
 	executionRepo := repository.NewPostgresScheduleExecutionRepository(db)
 
 	// NATS Publisher
-	natsPublisher, err := messaging.NewNATSPublisher(natsURL)
+	natsConn, err := messaging.NewNATSConnection(natsURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to NATS: %v", err)
 	}
-	defer natsPublisher.Close()
+	defer natsConn.Close()
+	natsPublisher := messaging.NewNATSPublisher(natsConn)
 
 	// HTTP Action Client e Composite Dispatcher
 	httpClient := httpinfra.NewHTTPActionClient(lightingURL, securityURL, deviceAPIKey)
@@ -118,7 +119,7 @@ func main() {
 		log.Printf("Schedule Service received signal %s, shutting down...", sig)
 		cronRunner.Stop()
 		db.Close()
-		natsPublisher.Close()
+		natsConn.Close()
 		os.Exit(0)
 	}()
 

@@ -57,23 +57,17 @@ func main() {
 	buzzerClient := device.NewBuzzerClient(esp32IP, deviceAPIKey)
 	jwtValidator := security.NewJWTValidator(jwtSecret)
 
-	alarmPublisher, err := messaging.NewNATSAlarmPublisher(natsURL)
-	if err != nil {
-		log.Printf("Aviso: falha ao criar publisher NATS de alarmes: %v", err)
-	}
-	if alarmPublisher != nil {
-		defer alarmPublisher.Close()
-	}
-
-	alarmService := application.NewAlarmService(alarmRepo, buzzerClient, buzzerDurationMs, deviceID, alarmPublisher)
-
-	// Subscriber NATS (recebe eventos de movimento e dispara alarme)
-	subscriber, err := messaging.NewNATSSubscriber(natsURL, alarmService, autoAlarmOnMotion)
+	natsConn, err := messaging.NewNATSConnection(natsURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to NATS: %v", err)
 	}
-	defer subscriber.Close()
+	defer natsConn.Close()
 
+	alarmPublisher := messaging.NewNATSAlarmPublisher(natsConn)
+	alarmService := application.NewAlarmService(alarmRepo, buzzerClient, buzzerDurationMs, deviceID, alarmPublisher)
+
+	// Subscriber NATS (recebe eventos de movimento e dispara alarme)
+	subscriber := messaging.NewNATSSubscriber(natsConn, alarmService, autoAlarmOnMotion)
 	if err := subscriber.Subscribe(); err != nil {
 		log.Fatalf("Failed to subscribe to NATS: %v", err)
 	}

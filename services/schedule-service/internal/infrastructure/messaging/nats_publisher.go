@@ -6,50 +6,23 @@ import (
 	"log"
 	"time"
 
-	"github.com/nats-io/nats.go"
-
 	"aurora/services/schedule-service/internal/domain"
 )
 
-// NATSPublisher publica eventos de execução de agendamentos no NATS
+// NATSPublisher implementa domain.ActionDispatcher publicando eventos no NATS
 type NATSPublisher struct {
-	conn *nats.Conn
+	conn *NATSConnection
 }
 
-// NewNATSPublisher cria uma nova conexão com o NATS e retorna um NATSPublisher
-func NewNATSPublisher(url string) (*NATSPublisher, error) {
-	conn, err := nats.Connect(url,
-		nats.RetryOnFailedConnect(true),
-		nats.MaxReconnects(-1),
-		nats.DisconnectErrHandler(func(nc *nats.Conn, err error) {
-			log.Printf("NATS publisher disconnected: %v", err)
-		}),
-		nats.ReconnectHandler(func(nc *nats.Conn) {
-			log.Printf("NATS publisher reconnected to %s", nc.ConnectedUrl())
-		}),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	log.Printf("NATS publisher connected to %s", url)
-	return &NATSPublisher{conn: conn}, nil
+// NewNATSPublisher cria um novo NATSPublisher a partir de uma conexão existente
+func NewNATSPublisher(conn *NATSConnection) *NATSPublisher {
+	return &NATSPublisher{conn: conn}
 }
 
-// scheduleExecutedEvent representa o payload publicado no tópico "schedule.executed"
-type scheduleExecutedEvent struct {
-	ScheduleID     string `json:"schedule_id"`
-	ScheduleName   string `json:"schedule_name"`
-	OwnerID        string `json:"owner_id"`
-	ActionType     string `json:"action_type"`
-	ActionDeviceID string `json:"action_device_id"`
-	ExecutedAt     string `json:"executed_at"`
-}
-
-// Dispatch publica um evento de execução de agendamento no tópico "schedule.executed".
+// Dispatch constrói um domain event a partir do Schedule e publica no NATS.
 // Realiza até 3 tentativas com backoff exponencial: 100ms, 500ms, 2s.
 func (p *NATSPublisher) Dispatch(ctx context.Context, schedule *domain.Schedule) error {
-	payload := scheduleExecutedEvent{
+	event := &domain.ScheduleExecutedEvent{
 		ScheduleID:     schedule.ID,
 		ScheduleName:   schedule.Name,
 		OwnerID:        schedule.OwnerID,
@@ -58,7 +31,7 @@ func (p *NATSPublisher) Dispatch(ctx context.Context, schedule *domain.Schedule)
 		ExecutedAt:     time.Now().Format(time.RFC3339),
 	}
 
-	data, err := json.Marshal(payload)
+	data, err := json.Marshal(event)
 	if err != nil {
 		return err
 	}
@@ -70,7 +43,7 @@ func (p *NATSPublisher) Dispatch(ctx context.Context, schedule *domain.Schedule)
 			return ctx.Err()
 		}
 
-		if err = p.conn.Publish("schedule.executed", data); err == nil {
+		if err = p.conn.GetConnection().Publish(event.Topic(), data); err == nil {
 			return nil
 		}
 		log.Printf("NATS publisher: publish attempt %d failed: %v", attempt+1, err)
@@ -84,11 +57,4 @@ func (p *NATSPublisher) Dispatch(ctx context.Context, schedule *domain.Schedule)
 	}
 
 	return domain.ErrPublishFailed
-}
-
-// Close fecha a conexão com o NATS
-func (p *NATSPublisher) Close() {
-	if p.conn != nil {
-		p.conn.Close()
-	}
 }

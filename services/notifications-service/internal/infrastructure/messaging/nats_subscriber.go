@@ -55,25 +55,12 @@ type scheduleExecutedEvent struct {
 
 // NATSSubscriber gerencia as subscricoes NATS do notifications-service
 type NATSSubscriber struct {
-	conn    *nats.Conn
+	conn    *NATSConnection
 	service *application.NotificationService
 }
 
-func NewNATSSubscriber(natsURL string, service *application.NotificationService) (*NATSSubscriber, error) {
-	var nc *nats.Conn
-	var err error
-	for i := 0; i < 10; i++ {
-		nc, err = nats.Connect(natsURL)
-		if err == nil {
-			break
-		}
-		log.Printf("[NATS] Aguardando NATS... tentativa %d/10", i+1)
-		time.Sleep(2 * time.Second)
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &NATSSubscriber{conn: nc, service: service}, nil
+func NewNATSSubscriber(conn *NATSConnection, service *application.NotificationService) *NATSSubscriber {
+	return &NATSSubscriber{conn: conn, service: service}
 }
 
 func (s *NATSSubscriber) Subscribe() error {
@@ -89,7 +76,7 @@ func (s *NATSSubscriber) Subscribe() error {
 	}
 
 	for _, sub := range subs {
-		if _, err := s.conn.Subscribe(sub.subject, sub.handler); err != nil {
+		if _, err := s.conn.GetConnection().Subscribe(sub.subject, sub.handler); err != nil {
 			return err
 		}
 		log.Printf("[NATS] Subscrito em %s", sub.subject)
@@ -154,6 +141,3 @@ func (s *NATSSubscriber) handleScheduleExecuted(msg *nats.Msg) {
 	}
 }
 
-func (s *NATSSubscriber) Close() {
-	s.conn.Close()
-}
